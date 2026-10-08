@@ -1,0 +1,146 @@
+/* =========================================================
+   CONTENU DU CV — FR / EN. Tout le texte des télés vient d'ici.
+   Images : mettre une URL (fichier publié à côté de la page) ou une
+   data:URI dans MEDIA.photo et MEDIA.shots[id]. Sinon un aperçu
+   dessiné s'affiche, marqué « capture à venir ».
+   ========================================================= */
+const MEDIA = {
+  photo: null,
+  shots: { docupedia:[], rankeddb:[], tracker:[], anticheat:[], classement:[], portfolio:[] }
+};
+const LINKS = {
+  github: 'https://github.com/damiensabau',
+  portfolio: 'https://github.com/damiensabau/portfolio',
+};
+// couleur de l'étiquette de la cassette, type d'aperçu dessiné, lien
+const PROJECT_META = [
+  {id:'docupedia',  color:'#d9cfb8', mock:'docs',        link:null},
+  {id:'rankeddb',   color:'#e9a23b', mock:'leaderboard', link:LINKS.github},
+  {id:'tracker',    color:'#6fb3a8', mock:'stats',       link:LINKS.github},
+  {id:'anticheat',  color:'#d0583a', mock:'dashboard',   link:LINKS.github},
+  {id:'classement', color:'#8fb35a', mock:'phone',       link:LINKS.github},
+  {id:'portfolio',  color:'#b88ad9', mock:'tvs',         link:LINKS.portfolio},
+];
+
+const CONTENT = {};
+CONTENT.fr = {
+  name: 'DAMIEN SABAU',
+  role: 'DÉVELOPPEUR WEB · RÉSEAUX & SÉCURITÉ',
+  sections: [
+    { id:'profil', label:'PROFIL', ch:'CH 02', title:'PROFIL', photo:true, blocks:[
+      {p:"Apprenti développeur à la DSI d'Enedis, dans l'équipe Web & Mobile, et étudiant en Master 1 à Sorbonne Université."},
+      {p:"Je construis des applications web full-stack, je m'intéresse aux réseaux et à la sécurité, et je dirige Noctura Esport, une structure compétitive Call of Duty."},
+      {gap:1},
+      {kv:['POSTE','Apprenti développeur · Enedis']},
+      {kv:['ÉCOLE','Sorbonne Université · M1']},
+      {kv:['ESPORT','Fondateur de Noctura Esport']},
+    ]},
+    { id:'experience', label:'EXPÉRIENCE', ch:'CH 03', title:'EXPÉRIENCE', blocks:[
+      {h:'ENEDIS · DSI WEB & MOBILE'},
+      {sub:'Apprenti développeur · alternance en cours'},
+      {li:"Docupedia : application interne de gestion documentaire (Next.js, Node.js, Prisma, PostgreSQL)."},
+      {li:"Intégration Kafka en autonomie : KafkaJS avec mTLS vers BEM Cloud, producteurs, consommateurs, partitions et offsets."},
+      {li:"Résolution d'une erreur de broker sur les messages trop lourds (maxRequestSize)."},
+      {li:"Migration de serveurs CentOS vers Rocky Linux."},
+      {li:"Industrialisation : tests Jest, analyses SonarQube et Checkmarx."},
+      {h:'NOCTURA ESPORT'},
+      {sub:'Fondateur'},
+      {li:"Structure esport française centrée sur Call of Duty compétitif (Warzone, CDL)."},
+      {li:"Base de données joueurs : statistiques, fiches équipes et tableau de KPI."},
+      {li:"Production de contenus courts (TikTok, voix de synthèse)."},
+    ]},
+    { id:'projets', label:'PROJETS', ch:'CH 04', title:'PROJETS', projects:true, blocks:[] },
+    { id:'competences', label:'COMPÉTENCES', ch:'CH 05', title:'COMPÉTENCES', blocks:[
+      {h:'DÉVELOPPEMENT'},
+      {tags:['Next.js','React','Node.js','Prisma','PostgreSQL','C# / .NET','Three.js']},
+      {h:'MESSAGERIE & INFRA'},
+      {tags:['Kafka','KafkaJS','mTLS','Rocky Linux','CentOS']},
+      {h:'QUALITÉ'},
+      {tags:['Jest','SonarQube','Checkmarx']},
+      {h:'RÉSEAUX & SÉCURITÉ'},
+      {tags:['Réseaux','Cloud','Comms numériques','Sécurité']},
+    ]},
+    { id:'formation', label:'FORMATION', ch:'CH 06', title:'FORMATION', blocks:[
+      {h:'MASTER 1 RES · ALT-SEC'},
+      {sub:'Sorbonne Université · alternance via le CFA INSTA'},
+      {sub:'En cours'},
+      {p:"Réseaux, cloud, communications numériques et sécurité."},
+      {h:'ALTERNANCE'},
+      {p:"Rythme école / entreprise avec la DSI d'Enedis, équipe Web & Mobile."},
+    ]},
+    { id:'contact', label:'CONTACT', ch:'CH 07', title:'CONTACT', links:[{href:LINKS.github, label:'Profil GitHub ↗'}], blocks:[
+      {kv:['GITHUB','github.com/damiensabau']},
+      {kv:['EMAIL','à compléter']},
+      {kv:['LINKEDIN','à compléter']},
+      {kv:['ESPORT','Noctura Esport']},
+      {gap:1},
+      {p:"Ouvert aux échanges : alternance, projet ou collaboration."},
+    ]},
+  ],
+  projects: [
+    { title:'DOCUPEDIA', tape:'DOCUPEDIA', sub:'Enedis · DSI Web & Mobile', status:'Projet interne',
+      stack:['Next.js','Node.js','Prisma','PostgreSQL','KafkaJS'],
+      desc:"Application interne de gestion documentaire, ma mission principale en alternance.",
+      bullets:["Intégration Kafka en autonomie : KafkaJS avec mTLS vers BEM Cloud.","Producteurs, consommateurs, partitions et offsets.","Qualité : Jest, SonarQube, Checkmarx."],
+      linkLabel:null },
+    { title:'RANKEDDB', tape:'RANKEDDB · WZRANKED', sub:'Aussi appelé wzranked', status:'Web + mobile',
+      stack:['Web','Mobile'],
+      desc:"Projet de classement autour de Warzone, avec une version application mobile.",
+      bullets:[], linkLabel:'Profil GitHub ↗' },
+    { title:'TRACKER WARZONE', tape:'TRACKER WARZONE', sub:'Statistiques joueurs', status:'Page d’accueil',
+      stack:['React','Next.js'],
+      desc:"Page d'accueil d'un tracker de statistiques joueurs pour Warzone.",
+      bullets:["Interface en verre dépoli (glassmorphism)."], linkLabel:'Profil GitHub ↗' },
+    { title:'ANTI-TRICHE', tape:'ANTI-TRICHE', sub:'Outil pour Noctura Esport', status:'Exploration',
+      stack:['C# / .NET','React'],
+      desc:"Client en mode utilisateur avec un tableau de bord React, pensé pour cohabiter avec Ricochet.",
+      bullets:[], linkLabel:'Profil GitHub ↗' },
+    { title:'APPLI DE CLASSEMENT', tape:'CLASSEMENT FILMS', sub:'Application mobile avec comptes', status:'En conception',
+      stack:['Mobile','API TMDb'],
+      desc:"Lister, comparer et classer films, séries, plats et tout le reste, avec des suggestions selon les goûts.",
+      bullets:["La V1 commence par les films et les genres."], linkLabel:'Profil GitHub ↗' },
+    { title:'CE PORTFOLIO', tape:'PORTFOLIO 3D', sub:'CV interactif', status:'En ligne',
+      stack:['Three.js','WebGL'],
+      desc:"Un CV en 3D : chaque section s'allume sur sa propre télé, les projets sont des cassettes.",
+      bullets:[], linkLabel:'Voir le dépôt ↗' },
+  ],
+  ui: {
+    lang:'fr', otherLang:'EN', textVersion:'Version texte', close:'Fermer', backMenu:'◀ Retour au menu',
+    soundOn:'Son : oui', soundOff:'Son : non', lightOn:'Lumière : oui', lightOff:'Lumière : non',
+    bootKicker:'CV interactif', bootRole:'Développeur web · Réseaux & sécurité', bootPower:'[ ALLUMER ]',
+    bootSmall:'Son conseillé · clavier, souris ou tactile', loading:'CHARGEMENT',
+    chStandby:'Canal 00 · Veille', ch:'Canal',
+    hintMenu:'↑ ↓ choisir · Entrée ouvrir · tournez le bouton chromé · L lumière',
+    hintMenuTouch:'Touchez une ligne ou une télé · tournez le bouton chromé',
+    hintSection:'↑ ↓ défiler · Échap retour', hintSectionTouch:'Glissez pour défiler',
+    hintList:'↑ ↓ choisir · Entrée lire · ou cliquez une cassette', hintListTouch:'Touchez un titre ou une cassette',
+    hintDetail:'↑ ↓ défiler · Échap éjecter la cassette', hintDetailTouch:'Glissez pour défiler',
+    hintTerm:'Tapez « aide » · Échap pour quitter', hintNoSignal:'Pas de signal · continuez à tourner', hintMire:'Tournez le bouton chromé',
+    menuHeader:'GUIDE DES CHAÎNES  //  CV INTERACTIF', menuFoot:'↑ ↓ CHOISIR     ENTRÉE ▸ OUVRIR', menuFootTouch:'TOUCHER ▸ OUVRIR UN CANAL',
+    signal:'SIGNAL', signalLines:['ENEDIS · DSI','SORBONNE · M1','NOCTURA ESPORT'],
+    back:'◀ RETOUR', backList:'◀ LISTE', scroll:'▼ DÉFILER', scrollTouch:'▼ GLISSER POUR DÉFILER',
+    noSignal:'PAS DE SIGNAL', noSignalTease:'… ESSAYEZ LE CANAL 12', listHead:'VIDÉOTHÈQUE', listFoot:'ENTRÉE ▸ LIRE LA CASSETTE',
+    play:'LECTURE', stop:'STOP', eject:'ÉJECTION', shotPlaceholder:'APERÇU · CAPTURE À VENIR', photoPlaceholder:'PHOTO À VENIR',
+    stack:'STACK', status:'STATUT', internal:'PROJET INTERNE · PAS DE LIEN PUBLIC',
+    mireTitle:'DS·VISION', mireSub:'MIRE DE RÉGLAGE', mireTurn:'TOURNEZ LE SÉLECTEUR ▸',
+    termTitle:'CANAL 12  //  TERMINAL',
+  },
+  term: {
+    welcome:['DS·VISION TERMINAL v1.2', "Connexion établie sur le canal 12.", "Tapez « aide » pour la liste des commandes.", ''],
+    help:['aide         liste des commandes','whoami       qui je suis','projets      la vidéothèque','projet N     lire la cassette N','competences  stack technique','formation    études','contact      me joindre','noctura      mon organisation esport','langue en    switch to English','effacer      vider l’écran','quitter      retour au menu'],
+    whoami:['Damien Sabau','Apprenti développeur · DSI Enedis, équipe Web & Mobile','Master 1 · Sorbonne Université','Fondateur de Noctura Esport'],
+    projectsIntro:'Cassettes disponibles :', projectsOutro:'Tapez « projet 2 » pour lire la cassette 2.',
+    projectBad:'Numéro de cassette inconnu.', projectGo:'Insertion de la cassette…',
+    skills:['Dév : Next.js, React, Node.js, Prisma, PostgreSQL, C#/.NET, Three.js','Infra : Kafka, KafkaJS, mTLS, Rocky Linux, CentOS','Qualité : Jest, SonarQube, Checkmarx','Réseaux, cloud, sécurité'],
+    education:['Master 1 RES · ALT-SEC — Sorbonne Université','En alternance via le CFA INSTA, avec la DSI d’Enedis'],
+    contact:['GitHub   github.com/damiensabau','Email    à compléter','LinkedIn à compléter'],
+    noctura:['NOCTURA ESPORT','Structure française Call of Duty compétitif (Warzone, CDL).','Base joueurs, KPI, contenus courts, outils maison.'],
+    ls:['cv.txt   projets/   noctura/   secret.txt'],
+    cv:['Voir les canaux 02 à 07. Ou tapez « whoami ».'],
+    secret:['Le canal 12 n’était pas si secret.','Bravo, vous avez l’œil d’un recruteur tech.'],
+    sudo:['Permission refusée. Bien essayé.'],
+    exit:'Retour au menu…', langSet:'Langue : français.',
+    unknown:(c)=>`Commande inconnue : ${c}. Tapez « aide ».`,
+    date:()=>new Date().toLocaleString('fr-FR'),
+  }
+};

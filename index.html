@@ -1,0 +1,2078 @@
+<title>Portfolio Damien Sabau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: plein écran WebGL, HUD fin en haut et en bas, panneaux en surimpression */
+:root{
+  --void:#050608;      /* fond de la pièce */
+  --phos:#ffb547;      /* phosphore ambre */
+  --phos-dim:#9a6a26;  /* ambre éteint */
+  --ink:#140c02;       /* texte sur barre ambre */
+  --panel:#0d0a06ee;   /* panneau texte */
+  --line:#3a2810;      /* filets */
+  --ink:#140c02;       /* texte sur ambre */
+  --f-screen:"VT323","Courier New",monospace;
+  --f-ui:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--void);color:var(--phos);overflow:hidden}
+body{font-family:var(--f-ui)}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+.hud{position:fixed;left:0;right:0;display:flex;align-items:center;gap:12px;padding-inline:16px;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--phos-dim);pointer-events:none;z-index:5}
+.hud.top{top:0;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.hud.bottom{bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));justify-content:center;text-align:center}
+.hud .sp{flex:1}
+.hud button,#backBtn{pointer-events:auto;font:inherit;letter-spacing:inherit;text-transform:uppercase;color:var(--phos);
+  background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}
+.hud button:hover,#backBtn:hover{border-color:var(--phos-dim)}
+.hud button:focus-visible,#backBtn:focus-visible,#power:focus-visible,#closeTxt:focus-visible{outline:2px solid var(--phos);outline-offset:2px}
+#chan{color:var(--phos)}
+#chan::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--phos);margin-right:8px;vertical-align:1px;animation:blink 1.4s steps(2) infinite}
+#backBtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:6;
+  font-family:var(--f-ui);font-size:12px;letter-spacing:.14em;background:#0d0a06cc;padding:10px 16px}
+@keyframes blink{50%{opacity:.15}}
+
+#boot{position:fixed;inset:0;display:grid;place-items:center;z-index:10;cursor:pointer;
+  background:radial-gradient(ellipse at center,#05060899 0%,#050608f2 70%);transition:opacity .8s ease}
+#boot.off{opacity:0;pointer-events:none}
+.boot-in{text-align:center;padding-inline:16px;max-width:36rem}
+.boot-in .k{font-size:11px;letter-spacing:.3em;color:var(--phos-dim);margin:0 0 10px}
+.boot-in h1{font-family:var(--f-screen);font-weight:400;font-size:clamp(48px,11vw,104px);line-height:.9;margin:0;color:var(--phos);
+  text-shadow:0 0 18px #ffb54766,0 0 2px #ffb547;letter-spacing:.04em;text-wrap:balance}
+.boot-in .r{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--phos-dim);margin:14px 0 30px}
+#power{font-family:var(--f-screen);font-size:30px;color:var(--phos);background:transparent;border:0;cursor:pointer;letter-spacing:.08em;animation:blink 1.1s steps(2) infinite}
+.boot-in .s{font-size:10px;letter-spacing:.2em;color:var(--phos-dim);margin-top:22px;text-transform:uppercase}
+
+#textcv{position:fixed;inset:0;z-index:20;background:#050608e6;overflow:auto;padding-inline:16px;padding-block:calc(20px + env(safe-area-inset-top,0px)) 40px}
+.tc-in{max-width:44rem;margin:0 auto;background:var(--panel);border:1px solid var(--line);padding:24px clamp(16px,4vw,36px) 32px}
+.tc-in header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:8px}
+.tc-in h2{font-family:var(--f-screen);font-weight:400;font-size:44px;margin:0;flex:1;line-height:1}
+.tc-in header p{width:100%;margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--phos-dim)}
+#closeTxt{font:inherit;font-size:11px;letter-spacing:.14em;color:var(--phos);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}
+.tc-sec h3{font-family:var(--f-screen);font-weight:400;font-size:30px;letter-spacing:.06em;margin:26px 0 6px;color:var(--phos)}
+.tc-sec h4{font-size:13px;letter-spacing:.08em;margin:16px 0 2px;color:#f6d39b}
+.tc-sec p,.tc-sec li,.tc-sec dd{font-size:13px;line-height:1.65;color:#e9c993;margin:4px 0}
+.tc-sec .sub{color:var(--phos-dim);font-size:12px;margin:0 0 4px}
+.tc-sec ul{margin:6px 0;padding-left:18px}
+.tc-sec .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.tc-sec .tags span{border:1px solid var(--line);padding:3px 8px;font-size:12px;color:#e9c993}
+.tc-sec dl{display:grid;grid-template-columns:7rem 1fr;gap:4px 12px;margin:6px 0}
+.tc-sec dt{font-size:11px;letter-spacing:.12em;color:var(--phos-dim);padding-top:3px}
+.tc-sec dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.tc-sec a{color:var(--phos);text-underline-offset:3px}
+.hud .grp{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:560px){.hud.top{align-items:flex-start}.hud .grp button{padding:5px 7px;font-size:10px}#chan{max-width:9rem}}
+
+#loader{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:var(--void);transition:opacity .6s ease;padding-inline:16px}
+#loader.off{opacity:0;pointer-events:none}
+.ld-in{display:grid;gap:14px;justify-items:center;width:min(520px,100%)}
+.ld-tv{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:22px/18px;overflow:hidden;background:#000;
+  box-shadow:0 0 0 10px #16130f,0 0 0 12px #2a241b,0 0 60px #ffb54722}
+.ld-tv canvas{width:100%;height:100%;display:block;filter:saturate(.85) contrast(1.05)}
+.ld-tv::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+#loadTxt{font-size:11px;letter-spacing:.24em;color:var(--phos-dim);margin:0;font-variant-numeric:tabular-nums}
+
+#links{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px)}
+#links a{font-family:var(--f-ui);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--phos);padding:9px 14px;text-decoration:none;border:1px solid var(--phos)}
+#links a:hover{background:transparent;color:var(--phos)}
+#links a:focus-visible{outline:2px solid var(--phos);outline-offset:3px}
+body.has-back #links{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+#termInput{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;font-size:16px;z-index:1}
+@media (prefers-reduced-motion:reduce){#chan::before,#power{animation:none}#boot,#loader{transition:none}}
+</style>
+
+<canvas id="gl" tabindex="0" aria-label="Pièce 3D avec des téléviseurs : le menu du CV s'affiche dans la télé principale"></canvas>
+
+<div class="hud top">
+  <span id="chan">Canal 00</span>
+  <span class="sp"></span>
+  <span class="grp">
+    <button id="txtBtn" type="button">Version texte</button>
+    <button id="lightBtn" type="button">Lumière</button>
+    <button id="sndBtn" type="button">Son</button>
+    <button id="langBtn" type="button">EN</button>
+  </span>
+</div>
+<div class="hud bottom"><span id="hint"></span></div>
+<button id="backBtn" type="button" hidden>◀ Retour au menu</button>
+<div id="links" hidden></div>
+<input id="termInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal" tabindex="-1">
+
+<div id="loader" role="status">
+  <div class="ld-in">
+    <div class="ld-tv"><canvas id="mire" width="640" height="480" aria-hidden="true"></canvas></div>
+    <p id="loadTxt">0 %</p>
+  </div>
+</div>
+
+<div id="boot" role="button" tabindex="0" aria-label="Allumer / Power on" hidden>
+  <div class="boot-in">
+    <p class="k" id="bootKicker">CV interactif</p>
+    <h1>DAMIEN SABAU</h1>
+    <p class="r" id="bootRole">Développeur web · Réseaux &amp; sécurité</p>
+    <button id="power" type="button">[ ALLUMER ]</button>
+    <p class="s" id="bootSmall">Son conseillé · clavier, souris ou tactile</p>
+  </div>
+</div>
+
+<section id="textcv" hidden>
+  <div class="tc-in">
+    <header>
+      <h2>DAMIEN SABAU</h2>
+      <button id="closeTxt" type="button">Fermer</button>
+      <p id="tcRole">Développeur web · Réseaux &amp; sécurité</p>
+    </header>
+    <div id="tcBody"></div>
+  </div>
+</section>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+/* =========================================================
+   CONTENU DU CV — FR / EN. Tout le texte des télés vient d'ici.
+   Images : mettre une URL (fichier publié à côté de la page) ou une
+   data:URI dans MEDIA.photo et MEDIA.shots[id]. Sinon un aperçu
+   dessiné s'affiche, marqué « capture à venir ».
+   ========================================================= */
+const MEDIA = {
+  photo: null,
+  shots: { docupedia:[], rankeddb:[], tracker:[], anticheat:[], classement:[], portfolio:[] }
+};
+const LINKS = {
+  github: 'https://github.com/damiensabau',
+  portfolio: 'https://github.com/damiensabau/portfolio',
+};
+// couleur de l'étiquette de la cassette, type d'aperçu dessiné, lien
+const PROJECT_META = [
+  {id:'docupedia',  color:'#d9cfb8', mock:'docs',        link:null},
+  {id:'rankeddb',   color:'#e9a23b', mock:'leaderboard', link:LINKS.github},
+  {id:'tracker',    color:'#6fb3a8', mock:'stats',       link:LINKS.github},
+  {id:'anticheat',  color:'#d0583a', mock:'dashboard',   link:LINKS.github},
+  {id:'classement', color:'#8fb35a', mock:'phone',       link:LINKS.github},
+  {id:'portfolio',  color:'#b88ad9', mock:'tvs',         link:LINKS.portfolio},
+];
+
+const CONTENT = {};
+CONTENT.fr = {
+  name: 'DAMIEN SABAU',
+  role: 'DÉVELOPPEUR WEB · RÉSEAUX & SÉCURITÉ',
+  sections: [
+    { id:'profil', label:'PROFIL', ch:'CH 02', title:'PROFIL', photo:true, blocks:[
+      {p:"Apprenti développeur à la DSI d'Enedis, dans l'équipe Web & Mobile, et étudiant en Master 1 à Sorbonne Université."},
+      {p:"Je construis des applications web full-stack, je m'intéresse aux réseaux et à la sécurité, et je dirige Noctura Esport, une structure compétitive Call of Duty."},
+      {gap:1},
+      {kv:['POSTE','Apprenti développeur · Enedis']},
+      {kv:['ÉCOLE','Sorbonne Université · M1']},
+      {kv:['ESPORT','Fondateur de Noctura Esport']},
+    ]},
+    { id:'experience', label:'EXPÉRIENCE', ch:'CH 03', title:'EXPÉRIENCE', blocks:[
+      {h:'ENEDIS · DSI WEB & MOBILE'},
+      {sub:'Apprenti développeur · alternance en cours'},
+      {li:"Docupedia : application interne de gestion documentaire (Next.js, Node.js, Prisma, PostgreSQL)."},
+      {li:"Intégration Kafka en autonomie : KafkaJS avec mTLS vers BEM Cloud, producteurs, consommateurs, partitions et offsets."},
+      {li:"Résolution d'une erreur de broker sur les messages trop lourds (maxRequestSize)."},
+      {li:"Migration de serveurs CentOS vers Rocky Linux."},
+      {li:"Industrialisation : tests Jest, analyses SonarQube et Checkmarx."},
+      {h:'NOCTURA ESPORT'},
+      {sub:'Fondateur'},
+      {li:"Structure esport française centrée sur Call of Duty compétitif (Warzone, CDL)."},
+      {li:"Base de données joueurs : statistiques, fiches équipes et tableau de KPI."},
+      {li:"Production de contenus courts (TikTok, voix de synthèse)."},
+    ]},
+    { id:'projets', label:'PROJETS', ch:'CH 04', title:'PROJETS', projects:true, blocks:[] },
+    { id:'competences', label:'COMPÉTENCES', ch:'CH 05', title:'COMPÉTENCES', blocks:[
+      {h:'DÉVELOPPEMENT'},
+      {tags:['Next.js','React','Node.js','Prisma','PostgreSQL','C# / .NET','Three.js']},
+      {h:'MESSAGERIE & INFRA'},
+      {tags:['Kafka','KafkaJS','mTLS','Rocky Linux','CentOS']},
+      {h:'QUALITÉ'},
+      {tags:['Jest','SonarQube','Checkmarx']},
+      {h:'RÉSEAUX & SÉCURITÉ'},
+      {tags:['Réseaux','Cloud','Comms numériques','Sécurité']},
+    ]},
+    { id:'formation', label:'FORMATION', ch:'CH 06', title:'FORMATION', blocks:[
+      {h:'MASTER 1 RES · ALT-SEC'},
+      {sub:'Sorbonne Université · alternance via le CFA INSTA'},
+      {sub:'En cours'},
+      {p:"Réseaux, cloud, communications numériques et sécurité."},
+      {h:'ALTERNANCE'},
+      {p:"Rythme école / entreprise avec la DSI d'Enedis, équipe Web & Mobile."},
+    ]},
+    { id:'contact', label:'CONTACT', ch:'CH 07', title:'CONTACT', links:[{href:LINKS.github, label:'Profil GitHub ↗'}], blocks:[
+      {kv:['GITHUB','github.com/damiensabau']},
+      {kv:['EMAIL','à compléter']},
+      {kv:['LINKEDIN','à compléter']},
+      {kv:['ESPORT','Noctura Esport']},
+      {gap:1},
+      {p:"Ouvert aux échanges : alternance, projet ou collaboration."},
+    ]},
+  ],
+  projects: [
+    { title:'DOCUPEDIA', tape:'DOCUPEDIA', sub:'Enedis · DSI Web & Mobile', status:'Projet interne',
+      stack:['Next.js','Node.js','Prisma','PostgreSQL','KafkaJS'],
+      desc:"Application interne de gestion documentaire, ma mission principale en alternance.",
+      bullets:["Intégration Kafka en autonomie : KafkaJS avec mTLS vers BEM Cloud.","Producteurs, consommateurs, partitions et offsets.","Qualité : Jest, SonarQube, Checkmarx."],
+      linkLabel:null },
+    { title:'RANKEDDB', tape:'RANKEDDB · WZRANKED', sub:'Aussi appelé wzranked', status:'Web + mobile',
+      stack:['Web','Mobile'],
+      desc:"Projet de classement autour de Warzone, avec une version application mobile.",
+      bullets:[], linkLabel:'Profil GitHub ↗' },
+    { title:'TRACKER WARZONE', tape:'TRACKER WARZONE', sub:'Statistiques joueurs', status:'Page d’accueil',
+      stack:['React','Next.js'],
+      desc:"Page d'accueil d'un tracker de statistiques joueurs pour Warzone.",
+      bullets:["Interface en verre dépoli (glassmorphism)."], linkLabel:'Profil GitHub ↗' },
+    { title:'ANTI-TRICHE', tape:'ANTI-TRICHE', sub:'Outil pour Noctura Esport', status:'Exploration',
+      stack:['C# / .NET','React'],
+      desc:"Client en mode utilisateur avec un tableau de bord React, pensé pour cohabiter avec Ricochet.",
+      bullets:[], linkLabel:'Profil GitHub ↗' },
+    { title:'APPLI DE CLASSEMENT', tape:'CLASSEMENT FILMS', sub:'Application mobile avec comptes', status:'En conception',
+      stack:['Mobile','API TMDb'],
+      desc:"Lister, comparer et classer films, séries, plats et tout le reste, avec des suggestions selon les goûts.",
+      bullets:["La V1 commence par les films et les genres."], linkLabel:'Profil GitHub ↗' },
+    { title:'CE PORTFOLIO', tape:'PORTFOLIO 3D', sub:'CV interactif', status:'En ligne',
+      stack:['Three.js','WebGL'],
+      desc:"Un CV en 3D : chaque section s'allume sur sa propre télé, les projets sont des cassettes.",
+      bullets:[], linkLabel:'Voir le dépôt ↗' },
+  ],
+  ui: {
+    lang:'fr', otherLang:'EN', textVersion:'Version texte', close:'Fermer', backMenu:'◀ Retour au menu',
+    soundOn:'Son : oui', soundOff:'Son : non', lightOn:'Lumière : oui', lightOff:'Lumière : non',
+    bootKicker:'CV interactif', bootRole:'Développeur web · Réseaux & sécurité', bootPower:'[ ALLUMER ]',
+    bootSmall:'Son conseillé · clavier, souris ou tactile', loading:'CHARGEMENT',
+    chStandby:'Canal 00 · Veille', ch:'Canal',
+    hintMenu:'↑ ↓ choisir · Entrée ouvrir · tournez le bouton chromé · L lumière',
+    hintMenuTouch:'Touchez une ligne ou une télé · tournez le bouton chromé',
+    hintSection:'↑ ↓ défiler · Échap retour', hintSectionTouch:'Glissez pour défiler',
+    hintList:'↑ ↓ choisir · Entrée lire · ou cliquez une cassette', hintListTouch:'Touchez un titre ou une cassette',
+    hintDetail:'↑ ↓ défiler · Échap éjecter la cassette', hintDetailTouch:'Glissez pour défiler',
+    hintTerm:'Tapez « aide » · Échap pour quitter', hintNoSignal:'Pas de signal · continuez à tourner', hintMire:'Tournez le bouton chromé',
+    menuHeader:'GUIDE DES CHAÎNES  //  CV INTERACTIF', menuFoot:'↑ ↓ CHOISIR     ENTRÉE ▸ OUVRIR', menuFootTouch:'TOUCHER ▸ OUVRIR UN CANAL',
+    signal:'SIGNAL', signalLines:['ENEDIS · DSI','SORBONNE · M1','NOCTURA ESPORT'],
+    back:'◀ RETOUR', backList:'◀ LISTE', scroll:'▼ DÉFILER', scrollTouch:'▼ GLISSER POUR DÉFILER',
+    noSignal:'PAS DE SIGNAL', noSignalTease:'… ESSAYEZ LE CANAL 12', listHead:'VIDÉOTHÈQUE', listFoot:'ENTRÉE ▸ LIRE LA CASSETTE',
+    play:'LECTURE', stop:'STOP', eject:'ÉJECTION', shotPlaceholder:'APERÇU · CAPTURE À VENIR', photoPlaceholder:'PHOTO À VENIR',
+    stack:'STACK', status:'STATUT', internal:'PROJET INTERNE · PAS DE LIEN PUBLIC',
+    mireTitle:'DS·VISION', mireSub:'MIRE DE RÉGLAGE', mireTurn:'TOURNEZ LE SÉLECTEUR ▸',
+    termTitle:'CANAL 12  //  TERMINAL',
+  },
+  term: {
+    welcome:['DS·VISION TERMINAL v1.2', "Connexion établie sur le canal 12.", "Tapez « aide » pour la liste des commandes.", ''],
+    help:['aide         liste des commandes','whoami       qui je suis','projets      la vidéothèque','projet N     lire la cassette N','competences  stack technique','formation    études','contact      me joindre','noctura      mon organisation esport','langue en    switch to English','effacer      vider l’écran','quitter      retour au menu'],
+    whoami:['Damien Sabau','Apprenti développeur · DSI Enedis, équipe Web & Mobile','Master 1 · Sorbonne Université','Fondateur de Noctura Esport'],
+    projectsIntro:'Cassettes disponibles :', projectsOutro:'Tapez « projet 2 » pour lire la cassette 2.',
+    projectBad:'Numéro de cassette inconnu.', projectGo:'Insertion de la cassette…',
+    skills:['Dév : Next.js, React, Node.js, Prisma, PostgreSQL, C#/.NET, Three.js','Infra : Kafka, KafkaJS, mTLS, Rocky Linux, CentOS','Qualité : Jest, SonarQube, Checkmarx','Réseaux, cloud, sécurité'],
+    education:['Master 1 RES · ALT-SEC — Sorbonne Université','En alternance via le CFA INSTA, avec la DSI d’Enedis'],
+    contact:['GitHub   github.com/damiensabau','Email    à compléter','LinkedIn à compléter'],
+    noctura:['NOCTURA ESPORT','Structure française Call of Duty compétitif (Warzone, CDL).','Base joueurs, KPI, contenus courts, outils maison.'],
+    ls:['cv.txt   projets/   noctura/   secret.txt'],
+    cv:['Voir les canaux 02 à 07. Ou tapez « whoami ».'],
+    secret:['Le canal 12 n’était pas si secret.','Bravo, vous avez l’œil d’un recruteur tech.'],
+    sudo:['Permission refusée. Bien essayé.'],
+    exit:'Retour au menu…', langSet:'Langue : français.',
+    unknown:(c)=>`Commande inconnue : ${c}. Tapez « aide ».`,
+    date:()=>new Date().toLocaleString('fr-FR'),
+  }
+};
+
+CONTENT.en = {
+  name: 'DAMIEN SABAU',
+  role: 'WEB DEVELOPER · NETWORKS & SECURITY',
+  sections: [
+    { id:'profil', label:'PROFILE', ch:'CH 02', title:'PROFILE', photo:true, blocks:[
+      {p:"Apprentice developer at Enedis' IT department, in the Web & Mobile team, and first-year Master's student at Sorbonne Université."},
+      {p:"I build full-stack web apps, I'm into networks and security, and I run Noctura Esport, a competitive Call of Duty organization."},
+      {gap:1},
+      {kv:['ROLE','Apprentice developer · Enedis']},
+      {kv:['SCHOOL','Sorbonne Université · M1']},
+      {kv:['ESPORTS','Founder of Noctura Esport']},
+    ]},
+    { id:'experience', label:'EXPERIENCE', ch:'CH 03', title:'EXPERIENCE', blocks:[
+      {h:'ENEDIS · IT, WEB & MOBILE'},
+      {sub:'Apprentice developer · ongoing work-study'},
+      {li:"Docupedia: internal document management app (Next.js, Node.js, Prisma, PostgreSQL)."},
+      {li:"Solo Kafka integration: KafkaJS with mTLS to BEM Cloud, producers, consumers, partitions and offsets."},
+      {li:"Fixed a broker error on oversized messages (maxRequestSize)."},
+      {li:"Server migration from CentOS to Rocky Linux."},
+      {li:"Industrialization: Jest tests, SonarQube and Checkmarx scans."},
+      {h:'NOCTURA ESPORT'},
+      {sub:'Founder'},
+      {li:"French esports organization focused on competitive Call of Duty (Warzone, CDL)."},
+      {li:"Player database: stats, team sheets and a KPI dashboard."},
+      {li:"Short-form content production (TikTok, synthetic voices)."},
+    ]},
+    { id:'projets', label:'PROJECTS', ch:'CH 04', title:'PROJECTS', projects:true, blocks:[] },
+    { id:'competences', label:'SKILLS', ch:'CH 05', title:'SKILLS', blocks:[
+      {h:'DEVELOPMENT'},
+      {tags:['Next.js','React','Node.js','Prisma','PostgreSQL','C# / .NET','Three.js']},
+      {h:'MESSAGING & INFRA'},
+      {tags:['Kafka','KafkaJS','mTLS','Rocky Linux','CentOS']},
+      {h:'QUALITY'},
+      {tags:['Jest','SonarQube','Checkmarx']},
+      {h:'NETWORKS & SECURITY'},
+      {tags:['Networks','Cloud','Digital comms','Security']},
+    ]},
+    { id:'formation', label:'EDUCATION', ch:'CH 06', title:'EDUCATION', blocks:[
+      {h:"MASTER'S YEAR 1 · RES ALT-SEC"},
+      {sub:'Sorbonne Université · work-study through CFA INSTA'},
+      {sub:'Ongoing'},
+      {p:"Networks, cloud, digital communications and security."},
+      {h:'WORK-STUDY'},
+      {p:"Alternating between school and Enedis' IT department, Web & Mobile team."},
+    ]},
+    { id:'contact', label:'CONTACT', ch:'CH 07', title:'CONTACT', links:[{href:LINKS.github, label:'GitHub profile ↗'}], blocks:[
+      {kv:['GITHUB','github.com/damiensabau']},
+      {kv:['EMAIL','to be added']},
+      {kv:['LINKEDIN','to be added']},
+      {kv:['ESPORTS','Noctura Esport']},
+      {gap:1},
+      {p:"Open to talk: work-study, projects or collaboration."},
+    ]},
+  ],
+  projects: [
+    { title:'DOCUPEDIA', tape:'DOCUPEDIA', sub:'Enedis · IT, Web & Mobile', status:'Internal project',
+      stack:['Next.js','Node.js','Prisma','PostgreSQL','KafkaJS'],
+      desc:"Internal document management app, my main work-study assignment.",
+      bullets:["Solo Kafka integration: KafkaJS with mTLS to BEM Cloud.","Producers, consumers, partitions and offsets.","Quality: Jest, SonarQube, Checkmarx."],
+      linkLabel:null },
+    { title:'RANKEDDB', tape:'RANKEDDB · WZRANKED', sub:'Also known as wzranked', status:'Web + mobile',
+      stack:['Web','Mobile'],
+      desc:"A Warzone ranking project, with a mobile app version.",
+      bullets:[], linkLabel:'GitHub profile ↗' },
+    { title:'WARZONE TRACKER', tape:'WARZONE TRACKER', sub:'Player statistics', status:'Home page',
+      stack:['React','Next.js'],
+      desc:"Home page of a Warzone player-stats tracker.",
+      bullets:["Glassmorphism interface."], linkLabel:'GitHub profile ↗' },
+    { title:'ANTI-CHEAT', tape:'ANTI-CHEAT', sub:'Tool for Noctura Esport', status:'Exploration',
+      stack:['C# / .NET','React'],
+      desc:"User-mode client with a React dashboard, designed to run alongside Ricochet.",
+      bullets:[], linkLabel:'GitHub profile ↗' },
+    { title:'RANKING APP', tape:'FILM RANKINGS', sub:'Mobile app with accounts', status:'In design',
+      stack:['Mobile','TMDb API'],
+      desc:"List, compare and rank films, series, dishes and everything else, with taste-based suggestions.",
+      bullets:["V1 starts with films and genres."], linkLabel:'GitHub profile ↗' },
+    { title:'THIS PORTFOLIO', tape:'3D PORTFOLIO', sub:'Interactive CV', status:'Live',
+      stack:['Three.js','WebGL'],
+      desc:"A 3D CV: each section lights up on its own TV, and projects are VHS tapes.",
+      bullets:[], linkLabel:'View the repo ↗' },
+  ],
+  ui: {
+    lang:'en', otherLang:'FR', textVersion:'Text version', close:'Close', backMenu:'◀ Back to menu',
+    soundOn:'Sound: on', soundOff:'Sound: off', lightOn:'Light: on', lightOff:'Light: off',
+    bootKicker:'Interactive CV', bootRole:'Web developer · Networks & security', bootPower:'[ POWER ON ]',
+    bootSmall:'Sound recommended · keyboard, mouse or touch', loading:'LOADING',
+    chStandby:'Channel 00 · Standby', ch:'Channel',
+    hintMenu:'↑ ↓ choose · Enter open · turn the chrome knob · L light',
+    hintMenuTouch:'Tap a line or a TV · turn the chrome knob',
+    hintSection:'↑ ↓ scroll · Esc back', hintSectionTouch:'Drag to scroll',
+    hintList:'↑ ↓ choose · Enter play · or click a tape', hintListTouch:'Tap a title or a tape',
+    hintDetail:'↑ ↓ scroll · Esc eject the tape', hintDetailTouch:'Drag to scroll',
+    hintTerm:'Type "help" · Esc to leave', hintNoSignal:'No signal · keep turning', hintMire:'Turn the chrome knob',
+    menuHeader:'CHANNEL GUIDE  //  INTERACTIVE CV', menuFoot:'↑ ↓ CHOOSE     ENTER ▸ OPEN', menuFootTouch:'TAP ▸ OPEN A CHANNEL',
+    signal:'SIGNAL', signalLines:['ENEDIS · IT','SORBONNE · M1','NOCTURA ESPORT'],
+    back:'◀ BACK', backList:'◀ LIST', scroll:'▼ SCROLL', scrollTouch:'▼ DRAG TO SCROLL',
+    noSignal:'NO SIGNAL', noSignalTease:'… TRY CHANNEL 12', listHead:'TAPE LIBRARY', listFoot:'ENTER ▸ PLAY THE TAPE',
+    play:'PLAY', stop:'STOP', eject:'EJECT', shotPlaceholder:'PREVIEW · SCREENSHOT COMING', photoPlaceholder:'PHOTO COMING',
+    stack:'STACK', status:'STATUS', internal:'INTERNAL PROJECT · NO PUBLIC LINK',
+    mireTitle:'DS·VISION', mireSub:'TEST PATTERN', mireTurn:'TURN THE DIAL ▸',
+    termTitle:'CHANNEL 12  //  TERMINAL',
+  },
+  term: {
+    welcome:['DS·VISION TERMINAL v1.2', 'Connected on channel 12.', 'Type "help" to list commands.', ''],
+    help:['help         list commands','whoami       who I am','projects     the tape library','project N    play tape N','skills       tech stack','education    studies','contact      get in touch','noctura      my esports org','lang fr      passer en français','clear        clear the screen','exit         back to the menu'],
+    whoami:['Damien Sabau','Apprentice developer · Enedis IT, Web & Mobile team',"Master's year 1 · Sorbonne Université",'Founder of Noctura Esport'],
+    projectsIntro:'Tapes available:', projectsOutro:'Type "project 2" to play tape 2.',
+    projectBad:'Unknown tape number.', projectGo:'Inserting the tape…',
+    skills:['Dev: Next.js, React, Node.js, Prisma, PostgreSQL, C#/.NET, Three.js','Infra: Kafka, KafkaJS, mTLS, Rocky Linux, CentOS','Quality: Jest, SonarQube, Checkmarx','Networks, cloud, security'],
+    education:["Master's year 1 RES · ALT-SEC — Sorbonne Université",'Work-study through CFA INSTA, with Enedis IT'],
+    contact:['GitHub   github.com/damiensabau','Email    to be added','LinkedIn to be added'],
+    noctura:['NOCTURA ESPORT','French competitive Call of Duty organization (Warzone, CDL).','Player database, KPIs, short-form content, in-house tools.'],
+    ls:['cv.txt   projects/   noctura/   secret.txt'],
+    cv:['See channels 02 to 07. Or type "whoami".'],
+    secret:['Channel 12 was not that secret after all.','Nice, you have a tech recruiter’s eye.'],
+    sudo:['Permission denied. Nice try.'],
+    exit:'Back to the menu…', langSet:'Language: English.',
+    unknown:(c)=>`Unknown command: ${c}. Type "help".`,
+    date:()=>new Date().toLocaleString('en-GB'),
+  }
+};
+
+/* langue courante : mémorisée pour ce navigateur seulement */
+let LANG = 'fr';
+try { const saved = localStorage.getItem('ds-lang'); if (saved === 'en' || saved === 'fr') LANG = saved; else if ((navigator.language || '').toLowerCase().startsWith('en')) LANG = 'en'; } catch(e){}
+let CV = CONTENT[LANG];
+let UI = CV.ui;
+
+/* =========================================================
+   MIRE (chargement + canal 01), VERSION TEXTE, LANGUE DU DOM
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+
+// mire de réglage originale : barres, grille, cercle, rampe de gris
+function drawMire(ctx, w, h, t, o = {}){
+  ctx.save();
+  ctx.fillStyle = '#121212'; ctx.fillRect(0, 0, w, h);
+  const bars = ['#c0c0c0','#c0c000','#00c0c0','#00c000','#c000c0','#c00000','#0000c0'];
+  const bh = h*.52, bw = w/bars.length;
+  bars.forEach((c,i)=>{ ctx.fillStyle = c; ctx.fillRect(Math.floor(i*bw), 0, Math.ceil(bw), bh); });
+  const rev = ['#0000c0','#121212','#c000c0','#121212','#00c0c0','#121212','#c0c0c0'];
+  rev.forEach((c,i)=>{ ctx.fillStyle = c; ctx.fillRect(Math.floor(i*bw), bh, Math.ceil(bw), h*.07); });
+  for (let i=0;i<8;i++){ const v = Math.round(i*255/7); ctx.fillStyle = `rgb(${v},${v},${v})`; ctx.fillRect(i*w/8, h*.82, Math.ceil(w/8), h*.18); }
+  // grille et cercle
+  ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = Math.max(1, w/512);
+  for (let x=w/16; x<w; x+=w/16){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h*.82); ctx.stroke(); }
+  for (let y=h/12; y<h*.82; y+=h/12){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(2, w/300);
+  ctx.beginPath(); ctx.arc(w/2, h*.43, h*.36, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(w/2 - h*.36, h*.43); ctx.lineTo(w/2 + h*.36, h*.43); ctx.moveTo(w/2, h*.07); ctx.lineTo(w/2, h*.79); ctx.stroke();
+  // cartouche central
+  const cw = w*.52, chh = h*.2, cx = w/2 - cw/2, cy = h*.43 - chh/2;
+  ctx.fillStyle = '#0b0b0b'; ctx.fillRect(cx, cy, cw, chh);
+  ctx.strokeStyle = '#ffb547'; ctx.lineWidth = Math.max(2, w/340); ctx.strokeRect(cx, cy, cw, chh);
+  ctx.fillStyle = '#ffb547'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `${Math.round(h*.085)}px VT323, "Courier New", monospace`;
+  ctx.fillText(o.title || 'DS·VISION', w/2, cy + chh*.38);
+  ctx.font = `${Math.round(h*.045)}px VT323, "Courier New", monospace`; ctx.fillStyle = '#e9c993';
+  ctx.fillText(o.sub || '', w/2, cy + chh*.76);
+  // barre de progression ou invitation
+  if (o.progress != null){
+    const pw = w*.5, ph = h*.035, px = w/2 - pw/2, py = h*.735;
+    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(px-4, py-4, pw+8, ph+8);
+    ctx.fillStyle = '#ffb547'; ctx.fillRect(px, py, pw*Math.min(1, o.progress), ph);
+  }
+  if (o.footer){
+    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(w*.2, h*.86, w*.6, h*.09);
+    ctx.fillStyle = Math.floor(t*2) % 2 ? '#ffb547' : '#9a6a26';
+    ctx.font = `${Math.round(h*.05)}px VT323, "Courier New", monospace`; ctx.fillText(o.footer, w/2, h*.905);
+  }
+  // balayage lumineux
+  const sy = ((t*.35) % 1) * h;
+  const g = ctx.createLinearGradient(0, sy-40, 0, sy+40); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,.07)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, sy-40, w, 80);
+  ctx.restore();
+}
+
+/* ---------- écran de chargement ---------- */
+const loaderEl = $('loader'), mireCanvas = $('mire'), loadTxt = $('loadTxt');
+let loadP = 0, loaderOn = true;
+function setProgress(p){ loadP = Math.max(loadP, p); if (loadTxt) loadTxt.textContent = `${UI.loading} ${Math.round(loadP*100)} %`; }
+(function loaderLoop(){
+  if (!loaderOn || !mireCanvas) return;
+  const ctx = mireCanvas.getContext('2d');
+  drawMire(ctx, mireCanvas.width, mireCanvas.height, performance.now()/1000, {sub:UI.mireSub, progress:loadP});
+  requestAnimationFrame(loaderLoop);
+})();
+function hideLoader(){
+  setProgress(1);
+  setTimeout(()=>{ loaderEl.classList.add('off'); $('boot').hidden = false; setTimeout(()=>{ loaderOn = false; loaderEl.remove(); }, 700); }, 250);
+}
+
+/* ---------- version texte (accessibilité + secours sans WebGL) ---------- */
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderTextCV(){
+  let html = '';
+  for (const s of CV.sections){
+    html += `<div class="tc-sec"><h3>${esc(s.title)}</h3>`;
+    if (s.projects){
+      CV.projects.forEach((p, i)=>{
+        const meta = PROJECT_META[i];
+        html += `<h4>${esc(p.title)}</h4><p class="sub">${esc(p.sub)} · ${esc(p.status)}</p><p>${esc(p.desc)}</p>`;
+        if (p.bullets.length) html += '<ul>' + p.bullets.map(b=>`<li>${esc(b)}</li>`).join('') + '</ul>';
+        html += `<div class="tags">${p.stack.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`;
+        if (meta.link && p.linkLabel) html += `<p><a href="${esc(meta.link)}" target="_blank" rel="noopener">${esc(p.linkLabel)}</a></p>`;
+      });
+    }
+    let inList = false, inDl = false;
+    const close = () => { if(inList){html+='</ul>';inList=false;} if(inDl){html+='</dl>';inDl=false;} };
+    for (const b of s.blocks){
+      if (b.li){ if(inDl){html+='</dl>';inDl=false;} if(!inList){html+='<ul>';inList=true;} html+=`<li>${esc(b.li)}</li>`; continue; }
+      if (b.kv){ if(inList){html+='</ul>';inList=false;} if(!inDl){html+='<dl>';inDl=true;} html+=`<dt>${esc(b.kv[0])}</dt><dd>${esc(b.kv[1])}</dd>`; continue; }
+      close();
+      if (b.h) html += `<h4>${esc(b.h)}</h4>`;
+      else if (b.sub) html += `<p class="sub">${esc(b.sub)}</p>`;
+      else if (b.p) html += `<p>${esc(b.p)}</p>`;
+      else if (b.tags) html += `<div class="tags">${b.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`;
+    }
+    close();
+    if (s.links) html += s.links.map(l=>`<p><a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a></p>`).join('');
+    html += '</div>';
+  }
+  $('tcBody').innerHTML = html;
+}
+
+/* ---------- textes du DOM selon la langue ---------- */
+let refreshToggles = null; // défini plus loin, une fois le son et la lumière prêts
+function applyLangDOM(){
+  document.documentElement.lang = UI.lang;
+  $('txtBtn').textContent = UI.textVersion;
+  $('langBtn').textContent = UI.otherLang;
+  $('langBtn').setAttribute('aria-label', UI.lang === 'fr' ? 'Switch to English' : 'Passer en français');
+  $('closeTxt').textContent = UI.close;
+  $('backBtn').textContent = UI.backMenu;
+  $('tcRole').textContent = UI.bootRole;
+  const bk = $('bootKicker'); if (bk){ bk.textContent = UI.bootKicker; $('bootRole').textContent = UI.bootRole; $('power').textContent = UI.bootPower; $('bootSmall').textContent = UI.bootSmall; }
+  if (refreshToggles) refreshToggles();
+  renderTextCV();
+  setProgress(loadP);
+}
+applyLangDOM();
+
+const textcv = $('textcv');
+$('txtBtn').onclick = () => { textcv.hidden = false; $('closeTxt').focus(); };
+$('closeTxt').onclick = () => { textcv.hidden = true; $('gl').focus(); };
+
+function webglFail(){
+  loaderOn = false; loaderEl?.remove();
+  $('boot')?.remove();
+  for (const id of ['closeTxt','txtBtn','sndBtn','lightBtn']) { const el = $(id); if (el) el.hidden = true; }
+  textcv.hidden = false;
+}
+
+/* =========================================================
+   3D
+   ========================================================= */
+let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, RoundedBoxGeometry, RoomEnvironment;
+try {
+  setProgress(.04);
+  THREE = await import('three'); setProgress(.42);
+  const mods = await Promise.all([
+    import('three/addons/geometries/RoundedBoxGeometry.js'),
+    import('three/addons/environments/RoomEnvironment.js'),
+    import('three/addons/postprocessing/EffectComposer.js'),
+    import('three/addons/postprocessing/RenderPass.js'),
+    import('three/addons/postprocessing/UnrealBloomPass.js'),
+    import('three/addons/postprocessing/OutputPass.js'),
+  ]);
+  ({RoundedBoxGeometry} = mods[0]); ({RoomEnvironment} = mods[1]); ({EffectComposer} = mods[2]);
+  ({RenderPass} = mods[3]); ({UnrealBloomPass} = mods[4]); ({OutputPass} = mods[5]);
+  setProgress(.6);
+} catch(e){ webglFail(); throw e; }
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse = matchMedia('(pointer: coarse)').matches;
+const M = reduce ? 0.45 : 1;
+
+const glCanvas = document.getElementById('gl');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({canvas: glCanvas, antialias: true, powerPreference:'high-performance'});
+} catch(e){ webglFail(); throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050608);
+scene.fog = new THREE.FogExp2(0x06080b, 0.11);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.05, 60);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.62, 0.55, 0.92);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ---------- textures procédurales ---------- */
+function canvasTex(w, h, draw, rep){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  if (rep){ t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
+  t.anisotropy = 4;
+  return t;
+}
+function speckle(ctx, w, h, n, a){
+  for (let i=0;i<n;i++){
+    const v = Math.random()*255|0;
+    ctx.fillStyle = `rgba(${v},${v},${v},${Math.random()*a})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, 1+Math.random()*2, 1+Math.random()*2);
+  }
+}
+const floorTex = canvasTex(512, 512, (ctx,w,h)=>{
+  ctx.fillStyle = '#26282a'; ctx.fillRect(0,0,w,h);
+  speckle(ctx,w,h,9000,.18);
+  for (let i=0;i<14;i++){ const g=ctx.createRadialGradient(Math.random()*w,Math.random()*h,0,Math.random()*w,Math.random()*h,120);
+    g.addColorStop(0,'rgba(0,0,0,.25)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h); }
+  ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 3;
+  ctx.strokeRect(0,0,w,h); ctx.beginPath(); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+}, [5,5]);
+const wallTex = canvasTex(512, 512, (ctx,w,h)=>{
+  const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#1d2226'); g.addColorStop(1,'#14181b');
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  speckle(ctx,w,h,6000,.12);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; for (let x=0;x<w;x+=128) ctx.fillRect(x,0,3,h);
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(0,h*.62,w,4);
+  for (let i=0;i<10;i++){ ctx.fillStyle=`rgba(40,30,15,${Math.random()*.12})`; ctx.fillRect(Math.random()*w, h*.62, 4+Math.random()*10, Math.random()*h*.38); }
+}, [4,1.5]);
+
+/* ---------- reflets (environnement studio, appliqué matériau par matériau) ---------- */
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+const woodTex = canvasTex(512, 512, (ctx,w,h)=>{
+  ctx.fillStyle = '#5a341b'; ctx.fillRect(0,0,w,h);
+  for (let i=0;i<240;i++){
+    const y0 = Math.random()*h, a = Math.random()*.22, amp = 2 + Math.random()*7, fr = .004 + Math.random()*.01, ph = Math.random()*6;
+    ctx.strokeStyle = Math.random() < .7 ? `rgba(30,14,5,${a})` : `rgba(140,90,50,${a*.6})`;
+    ctx.lineWidth = .6 + Math.random()*2.2; ctx.beginPath();
+    for (let x=0;x<=w;x+=8){ const y = y0 + Math.sin(x*fr + ph)*amp + Math.sin(x*fr*3.1)*amp*.3; x ? ctx.lineTo(x,y) : ctx.moveTo(x,y); }
+    ctx.stroke();
+  }
+  speckle(ctx,w,h,2500,.08);
+});
+const brushTex = canvasTex(512, 512, (ctx,w,h)=>{
+  ctx.fillStyle = '#9a9ea3'; ctx.fillRect(0,0,w,h);
+  for (let i=0;i<3500;i++){ const v = 120 + Math.random()*110|0; ctx.fillStyle = `rgba(${v},${v},${v+4},${Math.random()*.25})`; ctx.fillRect(0, Math.random()*h, w, Math.random()*1.4); }
+});
+const plasticTex = canvasTex(256, 256, (ctx,w,h)=>{ ctx.fillStyle = '#c9bfa9'; ctx.fillRect(0,0,w,h); speckle(ctx,w,h,3000,.07); });
+const grilleTex = canvasTex(256, 256, (ctx,w,h)=>{
+  ctx.fillStyle = '#26282b'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = '#060607';
+  for (let y=8;y<h;y+=14) for (let x=(y/14%2)*7+8;x<w;x+=14){ ctx.beginPath(); ctx.arc(x,y,4.2,0,Math.PI*2); ctx.fill(); }
+});
+grilleTex.wrapS = grilleTex.wrapT = THREE.RepeatWrapping;
+
+/* ---------- matériaux ---------- */
+const std = (o) => new THREE.MeshStandardMaterial({envMap:envTex, envMapIntensity:.08, ...o});
+const mats = {
+  grey:  std({color:0x3a3d42, roughness:.42, metalness:.35, envMapIntensity:.1}),
+  wood:  std({map:woodTex, roughness:.45, metalness:0, envMapIntensity:.1}),
+  cream: std({map:plasticTex, roughness:.4, metalness:0, envMapIntensity:.1}),
+  panel: std({map:brushTex, roughness:.38, metalness:.85, envMapIntensity:.25}),
+  bezel: std({color:0x070708, roughness:.32, metalness:.1, envMapIntensity:.12}),
+  chrome:std({color:0xe8e4dc, roughness:.14, metalness:1, envMapIntensity:.45}),
+  knob:  std({color:0x1a1a1c, roughness:.3, metalness:.3, envMapIntensity:.15}),
+  metal: std({color:0x3a3d40, roughness:.45, metalness:.8, envMapIntensity:.12}),
+  rubber:new THREE.MeshStandardMaterial({color:0x0e0e0f, roughness:.9}),
+  crate: new THREE.MeshStandardMaterial({color:0x2b2a24, roughness:.85}),
+  grille:std({map:grilleTex, roughness:.6, metalness:.4, envMapIntensity:.06}),
+  vent:  new THREE.MeshStandardMaterial({color:0x050505, roughness:.9}),
+  legWood:std({map:woodTex, roughness:.45, envMapIntensity:.1}),
+  // vitre : reflet doux dessiné à la main, sans miroir de l'environnement
+  glass: new THREE.ShaderMaterial({transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false,
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader:`varying vec2 vUv;
+      void main(){
+        vec2 p=vUv-0.5;
+        float sheen=smoothstep(0.15,0.55,vUv.y+ (0.5-vUv.x)*0.35)*smoothstep(1.0,0.7,vUv.y)*0.035;
+        float streak=exp(-pow((vUv.x*0.6+vUv.y-1.05)*14.0,2.0))*0.025;
+        float rim=smoothstep(0.36,0.5,max(abs(p.x),abs(p.y)))*0.02;
+        gl_FragColor=vec4(vec3(1.0,0.96,0.9)*(sheen+streak+rim),1.0);
+      }`}),
+};
+const accent = { grey:0xff8a2a, wood:0xd8b070, cream:0x2a2a2a };
+
+/* ---------- pièce ---------- */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(16,16), new THREE.MeshStandardMaterial({map:floorTex, roughness:.82, metalness:.12}));
+floor.rotation.x = -Math.PI/2; scene.add(floor);
+const wallMat = new THREE.MeshStandardMaterial({map:wallTex, roughness:.9});
+const back = new THREE.Mesh(new THREE.PlaneGeometry(14,3.6), wallMat); back.position.set(0,1.8,-1.75); scene.add(back);
+const left = new THREE.Mesh(new THREE.PlaneGeometry(10,3.6), wallMat); left.position.set(-3.5,1.8,2.5); left.rotation.y = Math.PI/2; scene.add(left);
+const right = new THREE.Mesh(new THREE.PlaneGeometry(10,3.6), wallMat); right.position.set(3.7,1.8,2.5); right.rotation.y = -Math.PI/2; scene.add(right);
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(16,16), new THREE.MeshStandardMaterial({color:0x0a0b0c, roughness:1}));
+ceil.position.y = 3.6; ceil.rotation.x = Math.PI/2; scene.add(ceil);
+
+const hemi = new THREE.HemisphereLight(0x3a4a5c, 0x080706, 0.8); scene.add(hemi);
+
+// ampoule suspendue
+const bulbGroup = new THREE.Group(); bulbGroup.position.set(0.35, 3.6, 0.7); scene.add(bulbGroup);
+const cord = new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.75,6), mats.rubber); cord.position.y = -.375; bulbGroup.add(cord);
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(.045,16,12), new THREE.MeshStandardMaterial({color:0xffd8a0, emissive:0xffb060, emissiveIntensity:3}));
+bulb.position.y = -.79; bulbGroup.add(bulb);
+const shade = new THREE.Mesh(new THREE.ConeGeometry(.16,.12,20,1,true), new THREE.MeshStandardMaterial({color:0x1c1d1f, metalness:.6, roughness:.4, side:THREE.DoubleSide}));
+shade.position.y = -.72; bulbGroup.add(shade);
+const bulbLight = new THREE.PointLight(0xffc488, 5, 7, 2); bulbLight.position.y = -.82; bulbGroup.add(bulbLight);
+
+/* ---------- shader écran CRT ---------- */
+const crtVert = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const crtFrag = `
+uniform sampler2D uTex; uniform float uTime,uStatic,uPower,uBright,uSeed,uTrack;
+varying vec2 vUv;
+float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+void main(){
+  vec2 uv=vUv;
+  float p=clamp(uPower,0.0,1.0);
+  float sx=smoothstep(0.0,0.35,p);
+  float sy=mix(0.006,1.0,smoothstep(0.3,1.0,p));
+  vec2 q=(uv-0.5)/vec2(max(sx,0.001),sy)+0.5;
+  vec2 c=q*2.0-1.0; c*=1.0+vec2(c.y*c.y,c.x*c.x)*0.045; vec2 t=c*0.5+0.5;
+  vec2 rq=abs(t-0.5)-(0.5-0.06); float sd=length(max(rq,0.0))+min(max(rq.x,rq.y),0.0)-0.06;
+  float inside=1.0-smoothstep(-0.006,0.0,sd);
+  float jit=(hash(vec2(floor(t.y*240.0),floor(uTime*24.0)+uSeed))-0.5)*0.004*(0.25+uStatic*2.0);
+  float band=exp(-pow((fract(t.y*0.8+uTime*0.45)-0.5)*7.0,2.0))*uTrack;
+  jit+=(hash(vec2(floor(t.y*90.0),floor(uTime*30.0)))-0.5)*0.05*band+sin(t.y*40.0+uTime*20.0)*0.004*uTrack;
+  vec2 tj=t+vec2(jit,0.0);
+  float ab=0.0016;
+  vec3 col=vec3(texture2D(uTex,tj+vec2(ab,0.0)).r, texture2D(uTex,tj).g, texture2D(uTex,tj-vec2(ab,0.0)).b);
+  float n=hash(floor(t*vec2(260.0,195.0))+floor(uTime*30.0)*vec2(1.7,3.1)+uSeed);
+  col=mix(col, vec3(n)*vec3(1.0,0.86,0.66)*0.5, uStatic);
+  col=mix(col, vec3(n)*0.9, band*0.55);
+  col*=0.78+0.22*sin(t.y*3.14159*384.0);
+  float sub=fract(t.x*1024.0/3.0);
+  vec3 mask=vec3(step(sub,0.333),step(0.333,sub)*step(sub,0.666),step(0.666,sub));
+  col*=mix(vec3(1.0),mask*1.9+0.25,0.16);
+  col+=vec3(1.0,0.62,0.22)*0.05*uBright*(1.0-smoothstep(-0.12,0.0,sd))*smoothstep(-0.12,-0.02,sd)*step(0.5,uPower);
+  float roll=exp(-pow((fract(t.y-uTime*0.11)-0.5)*9.0,2.0));
+  col*=1.0+roll*0.1;
+  vec2 v=t*(1.0-t); col*=pow(clamp(v.x*v.y*16.0,0.0,1.0),0.25);
+  col+=(n-0.5)*0.035;
+  col*=0.96+0.04*sin(uTime*55.0+uSeed);
+  col*=uBright*inside;
+  float line=(1.0-smoothstep(0.0,0.02,abs(uv.y-0.5)))*(1.0-smoothstep(0.3,0.9,p))*step(abs(uv.x-0.5),sx*0.5);
+  col+=vec3(1.0,0.85,0.6)*line*3.0;
+  col*=step(0.0001,p);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+
+/* =========================================================
+   ÉCRANS (canvas 2D, 1024×768, filtrés ensuite par le shader CRT)
+   ========================================================= */
+const CW = 1024, CH = 768;
+const C = {fg:'#ffb547', dim:'#9a6a26', faint:'#3a2810', ink:'#140c02', soft:'#f2cf94'};
+const BK = 0.045; // courbure, identique au shader
+const SAFE = 0.88; // le contenu est dessiné à 88 % pour rester loin des bords arrondis
+function safeBegin(ctx){ ctx.save(); ctx.translate(CW/2,CH/2); ctx.scale(SAFE,SAFE); ctx.translate(-CW/2,-CH/2); }
+function barrel(u, v){ let cx=u*2-1, cy=v*2-1; const kx=1+cy*cy*BK, ky=1+cx*cx*BK; cx*=kx; cy*=ky; return [cx*.5+.5, cy*.5+.5]; }
+const pad2 = n => String(n).padStart(2, '0');
+
+function paintBase(ctx){
+  const g = ctx.createRadialGradient(CW/2,CH/2,80,CW/2,CH/2,720);
+  g.addColorStop(0,'#1c1207'); g.addColorStop(1,'#060402');
+  ctx.fillStyle = g; ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle = 'rgba(255,181,71,0.045)';
+  for (let x=64;x<CW;x+=64) ctx.fillRect(x,0,1,CH);
+  for (let y=64;y<CH;y+=64) ctx.fillRect(0,y,CW,1);
+}
+function wrap(ctx, text, maxW){
+  const words = String(text).split(' '), lines = []; let line = '';
+  for (const w of words){ const test = line ? line+' '+w : w;
+    if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; } else line = test; }
+  if (line) lines.push(line); return lines;
+}
+function fitText(ctx, text, maxW){
+  if (ctx.measureText(text).width <= maxW) return text;
+  let s = text; while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+  return s + '…';
+}
+
+/* ---------- mise en page des blocs de texte ---------- */
+const AREA = {x:100, top:228, bottom:700, w:800};
+function layoutBlocks(ctx, blocks, W, y0 = 0){
+  const ops = []; let y = y0, first = y0 === 0;
+  for (const b of blocks){
+    if (b.h){ if(!first) y += 22; ctx.font='44px VT323'; for (const l of wrap(ctx,b.h,W)){ ops.push({k:'h',t:l,y,f:'44px VT323'}); y += 46; } }
+    else if (b.sub){ ctx.font='30px VT323'; for (const l of wrap(ctx,b.sub,W)){ ops.push({k:'sub',t:l,y,f:'30px VT323'}); y += 34; } }
+    else if (b.p){ ctx.font='34px VT323'; for (const l of wrap(ctx,b.p,W)){ ops.push({k:'p',t:l,y,f:'34px VT323'}); y += 36; } y += 10; }
+    else if (b.li){ ctx.font='32px VT323'; const ls = wrap(ctx,b.li,W-34);
+      ls.forEach((l,i)=>{ ops.push({k:'li',t:l,y,f:'32px VT323',bullet:i===0}); y += 33; }); y += 6; }
+    else if (b.tags){ ctx.font='30px VT323'; let x = 0; y += 4;
+      for (const t of b.tags){ const tw = ctx.measureText(t).width + 28;
+        if (x + tw > W){ x = 0; y += 54; }
+        ops.push({k:'tag',t,x,y,w:tw,f:'30px VT323'}); x += tw + 12; }
+      y += 62; }
+    else if (b.kv){ ctx.font='34px VT323'; const kw = Math.min(230, W*.36); const ls = wrap(ctx,b.kv[1],W-kw);
+      ops.push({k:'key',t:b.kv[0],y,f:'28px VT323'});
+      ls.forEach(l=>{ ops.push({k:'val',t:l,y,f:'34px VT323',kx:kw}); y += 38; }); y += 10; }
+    else if (b.warn){ ctx.font='28px VT323'; for (const l of wrap(ctx,b.warn,W)){ ops.push({k:'sub',t:l,y,f:'28px VT323'}); y += 32; } }
+    else if (b.gap){ y += 26; }
+    first = false;
+  }
+  return {ops, height:y};
+}
+function layoutSection(ctx, sec){
+  const W = sec.photo ? 520 : AREA.w;
+  return layoutBlocks(ctx, sec.blocks, W);
+}
+function drawOps(ctx, ops, x0, oy, extra){
+  for (const o of ops){
+    const y = oy + o.y; if (y < AREA.top-80 || y > AREA.bottom+10) continue;
+    ctx.font = o.f || '30px VT323';
+    if (o.k==='h'){ ctx.fillStyle = C.fg; ctx.fillText(o.t, x0, y+36); }
+    else if (o.k==='sub'){ ctx.fillStyle = C.dim; ctx.fillText(o.t, x0, y+26); }
+    else if (o.k==='p'){ ctx.fillStyle = C.soft; ctx.fillText(o.t, x0, y+28); }
+    else if (o.k==='li'){ ctx.fillStyle = C.fg; if (o.bullet) ctx.fillText('›', x0, y+26); ctx.fillStyle = C.soft; ctx.fillText(o.t, x0+34, y+26); }
+    else if (o.k==='tag'){ ctx.strokeStyle = C.dim; ctx.lineWidth = 2; ctx.strokeRect(x0+o.x, y, o.w, 44); ctx.fillStyle = C.soft; ctx.fillText(o.t, x0+o.x+14, y+32); }
+    else if (o.k==='key'){ ctx.fillStyle = C.dim; ctx.fillText(o.t, x0, y+28); }
+    else if (o.k==='val'){ ctx.fillStyle = C.soft; ctx.fillText(o.t, x0+(o.kx||230), y+28); }
+    else if (extra) extra(o, y);
+  }
+}
+function drawScrollbar(ctx, scroll, height, coarseHint){
+  const viewH = AREA.bottom - AREA.top, max = Math.max(0, height - viewH);
+  if (max <= 0) return;
+  ctx.fillStyle = C.faint; ctx.fillRect(932, AREA.top, 4, viewH);
+  const hh = Math.max(40, viewH * viewH / height), yy = AREA.top + (viewH - hh) * (scroll / max);
+  ctx.fillStyle = C.fg; ctx.fillRect(930, yy, 8, hh);
+  if (scroll < max - 4){ ctx.fillStyle = C.dim; ctx.font = '26px VT323'; ctx.fillText(coarseHint ? UI.scrollTouch : UI.scroll, 100, 740); }
+}
+function drawHeader(ctx, tv, chLabel, title, backLabel, active, t, backAct = 'back'){
+  ctx.fillStyle = C.dim; ctx.font = '30px VT323'; ctx.fillText(chLabel + '  //  ' + CV.name, 100, 108);
+  ctx.font = '32px VT323';
+  const bw = Math.max(150, ctx.measureText(backLabel).width + 40), bx = 924 - bw, by = 76, bh = 44;
+  const hov = tv.hover === backAct;
+  ctx.strokeStyle = hov ? C.fg : C.dim; ctx.lineWidth = 3; ctx.strokeRect(bx, by, bw, bh);
+  if (hov){ ctx.fillStyle = C.fg; ctx.fillRect(bx, by, bw, bh); }
+  ctx.fillStyle = hov ? C.ink : C.fg; ctx.fillText(backLabel, bx+20, by+33);
+  tv.hits.push({x:bx, y:by, w:bw, h:bh, act:backAct});
+  ctx.fillStyle = C.fg; ctx.font = '78px VT323';
+  ctx.fillText(fitText(ctx, title, 820) + (active && Math.floor(t*2.4)%2 ? '_' : ''), 100, 186);
+  ctx.fillStyle = C.faint; ctx.fillRect(100, 206, 824, 3);
+}
+
+/* ---------- images (photo, captures) ---------- */
+const imgCache = new Map();
+let onImageReady = () => {};
+function getImg(url){
+  if (!url) return null;
+  let e = imgCache.get(url);
+  if (!e){ e = {img:new Image(), ok:false}; e.img.onload = () => { e.ok = true; onImageReady(); }; e.img.src = url; imgCache.set(url, e); }
+  return e.ok ? e.img : null;
+}
+function drawCover(ctx, img, x, y, w, h){
+  const r = Math.max(w/img.width, h/img.height), iw = img.width*r, ih = img.height*r;
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.filter = 'grayscale(1) sepia(1) saturate(2.2) hue-rotate(-12deg) brightness(.95) contrast(1.1)';
+  ctx.drawImage(img, x + (w-iw)/2, y + (h-ih)/2, iw, ih); ctx.filter = 'none';
+  ctx.restore();
+}
+function drawPhotoFrame(ctx, x, y, w, h){
+  const img = getImg(MEDIA.photo);
+  ctx.fillStyle = '#0a0703'; ctx.fillRect(x, y, w, h);
+  if (img) drawCover(ctx, img, x, y, w, h);
+  else {
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.strokeStyle = C.faint; ctx.lineWidth = 2;
+    for (let i=-h; i<w; i+=22){ ctx.beginPath(); ctx.moveTo(x+i, y+h); ctx.lineTo(x+i+h, y); ctx.stroke(); }
+    ctx.restore();
+    ctx.fillStyle = '#0a0703'; ctx.fillRect(x+18, y+h*.18, w-36, h*.56);
+    ctx.fillStyle = C.fg; ctx.font = '150px VT323'; ctx.textAlign = 'center'; ctx.fillText('DS', x+w/2, y+h*.56);
+    ctx.font = '26px VT323'; ctx.fillStyle = C.dim; ctx.fillText(UI.photoPlaceholder, x+w/2, y+h*.68); ctx.textAlign = 'left';
+  }
+  ctx.strokeStyle = C.dim; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
+  ctx.fillStyle = C.fg; for (const [cx,cy] of [[x,y],[x+w,y],[x,y+h],[x+w,y+h]]) ctx.fillRect(cx-7, cy-7, 14, 14);
+}
+
+/* ---------- canal sans signal (neige dessinée + incrustation) ---------- */
+const noiseC = document.createElement('canvas'); noiseC.width = 256; noiseC.height = 192;
+const noiseX = noiseC.getContext('2d'), noiseD = noiseX.createImageData(256, 192);
+function drawNoise(ctx, alpha = 1){
+  const d = noiseD.data;
+  for (let i=0;i<d.length;i+=4){ const v = Math.random()*255; d[i] = v; d[i+1] = v*.92; d[i+2] = v*.78; d[i+3] = 255; }
+  noiseX.putImageData(noiseD, 0, 0);
+  ctx.save(); ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = false; ctx.drawImage(noiseC, 0, 0, CW, CH); ctx.restore();
+}
+function drawOSDChannel(ctx, n){
+  ctx.save(); ctx.font = '84px VT323'; ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillText('CH ' + pad2(n), 928, 136);
+  ctx.fillStyle = '#e8ffd8'; ctx.fillText('CH ' + pad2(n), 924, 132); ctx.restore();
+}
+function drawNoSignal(tv, t, n){
+  const ctx = tv.ctx; drawNoise(ctx); safeBegin(ctx); tv.hits = [];
+  drawOSDChannel(ctx, n);
+  ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(262, 330, 500, 110);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#e8ffd8'; ctx.font = '64px VT323'; ctx.fillText(UI.noSignal, 512, 405);
+  if (n === 11){ ctx.font = '34px VT323'; ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(282, 470, 460, 50); ctx.fillStyle = '#e8ffd8'; ctx.fillText(UI.noSignalTease, 512, 506); }
+  ctx.textAlign = 'left'; ctx.restore();
+}
+function drawMireChannel(tv, t){
+  tv.hits = [];
+  drawMire(tv.ctx, CW, CH, t, {sub:UI.mireSub, footer:UI.mireTurn});
+  drawOSDChannel(tv.ctx, 1);
+}
+
+/* ---------- guide des chaînes (télé principale, canaux 2 à 7) ---------- */
+function drawMenu(tv, t){
+  const ctx = tv.ctx; paintBase(ctx); safeBegin(ctx); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = C.dim; ctx.font = '30px VT323'; ctx.fillText(UI.menuHeader, 100, 108);
+  ctx.fillStyle = C.fg; ctx.font = '78px VT323'; ctx.fillText(CV.name, 100, 174);
+  ctx.fillStyle = C.dim; ctx.font = '30px VT323'; ctx.fillText(fitText(ctx, CV.role, 600), 100, 210);
+  ctx.font = '58px VT323'; ctx.textAlign = 'right'; ctx.fillStyle = C.fg; ctx.fillText('CH ' + pad2(st.tune), 924, 174); ctx.textAlign = 'left';
+  ctx.fillStyle = C.faint; ctx.fillRect(100, 232, 824, 3);
+  tv.hits = [];
+  const y0 = 304, lh = 64;
+  CV.sections.forEach((s,i)=>{
+    const y = y0 + i*lh, sel = i === st.sel;
+    if (sel){ ctx.fillStyle = C.fg; ctx.fillRect(86, y-48, 594, 60); }
+    ctx.fillStyle = sel ? C.ink : C.fg; ctx.font = '58px VT323';
+    ctx.fillText((sel ? '> ' : '  ') + s.label + (sel && Math.floor(t*2.4)%2 ? '_' : ''), 96, y);
+    ctx.font = '28px VT323'; ctx.fillStyle = sel ? C.ink : C.dim; ctx.textAlign = 'right';
+    ctx.fillText(s.ch, 664, y-6); ctx.textAlign = 'left';
+    tv.hits.push({x:86, y:y-48, w:594, h:60, act:'open', i});
+  });
+  const px = 712, py = 286, pw = 212, ph = 150;
+  ctx.strokeStyle = C.faint; ctx.lineWidth = 3; ctx.strokeRect(px, py, pw, ph);
+  ctx.fillStyle = C.dim; ctx.font = '26px VT323'; ctx.fillText(UI.signal, px, py-10);
+  ctx.strokeStyle = 'rgba(255,181,71,.12)'; ctx.lineWidth = 1;
+  for (let i=1;i<4;i++){ ctx.beginPath(); ctx.moveTo(px+i*pw/4,py); ctx.lineTo(px+i*pw/4,py+ph); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(px,py+ph/2); ctx.lineTo(px+pw,py+ph/2); ctx.stroke();
+  ctx.strokeStyle = C.fg; ctx.lineWidth = 3; ctx.beginPath();
+  const f = 2 + st.sel*0.6;
+  for (let x=0;x<=pw;x+=3){ const k = x/pw;
+    const yy = py + ph/2 + Math.sin(k*Math.PI*2*f + t*4)*ph*.28*Math.sin(k*Math.PI) + Math.sin(k*40+t*9)*3;
+    x ? ctx.lineTo(px+x, yy) : ctx.moveTo(px+x, yy); }
+  ctx.stroke();
+  ctx.fillStyle = C.dim; ctx.font = '26px VT323';
+  UI.signalLines.forEach((l,i)=>ctx.fillText(l, px, py+ph+40+i*30));
+  ctx.fillStyle = C.dim; ctx.font = '28px VT323';
+  ctx.fillText(coarse ? UI.menuFootTouch : UI.menuFoot, 100, 706);
+  ctx.restore();
+}
+
+/* ---------- sections classiques ---------- */
+function drawSection(tv, t, active){
+  if (tv.sec.projects) return drawProjects(tv, t, active);
+  const ctx = tv.ctx, sec = tv.sec; paintBase(ctx); safeBegin(ctx); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  tv.hits = [];
+  drawHeader(ctx, tv, sec.ch, sec.title, UI.back, active, t);
+  const L = tv.layout, viewH = AREA.bottom - AREA.top;
+  ctx.save(); ctx.beginPath(); ctx.rect(80, AREA.top-4, 860, viewH+8); ctx.clip();
+  drawOps(ctx, L.ops, AREA.x, AREA.top - tv.scroll);
+  ctx.restore();
+  if (sec.photo) drawPhotoFrame(ctx, 664, AREA.top + 6, 252, 316);
+  drawScrollbar(ctx, tv.scroll, L.height, coarse);
+  ctx.restore();
+}
+
+/* =========================================================
+   CANAL PROJETS : vidéothèque (liste) et fiche lue au magnétoscope
+   ========================================================= */
+function layoutProject(ctx, i){
+  const p = CV.projects[i], meta = PROJECT_META[i], ops = [];
+  const SX = 448, SW = 376;                     // colonne de droite, à côté de l'aperçu
+  ops.push({k:'shot', i, y:0, h:262});
+  ops.push({k:'lbl', t:UI.stack, x:SX, y:0});
+  ctx.font = '30px VT323';
+  let x = 0, y = 40;
+  for (const tg of p.stack){ const tw = ctx.measureText(tg).width + 28;
+    if (x + tw > SW && x > 0){ x = 0; y += 54; }
+    ops.push({k:'tag', t:tg, x:SX + x, y, w:tw, f:'30px VT323'}); x += tw + 12; }
+  y += 66;
+  ops.push({k:'lbl', t:UI.status, x:SX, y}); y += 36;
+  ops.push({k:'stat', t:p.status, x:SX, y, color:meta.color}); y += 44;
+  const top = Math.max(262, y) + 30;
+  const blocks = [{sub:p.sub}, {p:p.desc}, ...p.bullets.map(b=>({li:b}))];
+  if (!meta.link || !p.linkLabel) blocks.push({gap:1}, {warn:UI.internal});
+  const L = layoutBlocks(ctx, blocks, AREA.w, top);
+  return {ops: ops.concat(L.ops), height: L.height + 10};
+}
+
+/* ---------- aperçus dessinés en attendant les vraies captures ---------- */
+function drawMock(ctx, kind, x, y, w, h, t, color){
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.fillStyle = '#0d0904'; ctx.fillRect(x, y, w, h);
+  const fg = C.fg, dim = C.faint, acc = color;
+  ctx.fillStyle = dim; ctx.fillRect(x, y, w, 26); ctx.fillStyle = acc; ctx.fillRect(x+10, y+9, 8, 8);
+  ctx.fillStyle = C.dim; ctx.fillRect(x+26, y+9, 8, 8); ctx.fillRect(x+42, y+9, 8, 8);
+  const bx = x + 14, by = y + 40, bw = w - 28, bh = h - 54;
+  if (kind === 'docs'){
+    ctx.fillStyle = dim; ctx.fillRect(bx, by, 90, bh);
+    for (let i=0;i<6;i++){ ctx.fillStyle = i === 1 ? acc : C.dim; ctx.fillRect(bx+10, by+12+i*26, 60, 10); }
+    for (let i=0;i<6;i++){ const ry = by + 8 + i*30; ctx.fillStyle = C.dim; ctx.fillRect(bx+106, ry, 18, 22); ctx.fillStyle = fg; ctx.fillRect(bx+132, ry+4, 120 + (i*37 % 90), 8); ctx.fillStyle = dim; ctx.fillRect(bx+132, ry+15, 80, 5); }
+  } else if (kind === 'leaderboard'){
+    for (let i=0;i<7;i++){ const ry = by + i*29; ctx.fillStyle = i%2 ? 'rgba(255,181,71,.05)' : 'rgba(255,181,71,.1)'; ctx.fillRect(bx, ry, bw, 26);
+      ctx.fillStyle = i < 3 ? acc : C.dim; ctx.font = '22px VT323'; ctx.fillText('#' + (i+1), bx+8, ry+20);
+      ctx.fillStyle = fg; ctx.fillRect(bx+52, ry+9, 90 - i*6, 8);
+      ctx.fillStyle = acc; ctx.fillRect(bx+bw-150, ry+8, 140 - i*16, 10); }
+  } else if (kind === 'stats'){
+    for (let i=0;i<3;i++){ const cx = bx + i*(bw/3); ctx.strokeStyle = C.dim; ctx.lineWidth = 2; ctx.strokeRect(cx+4, by, bw/3-8, 70);
+      ctx.fillStyle = i === 0 ? acc : fg; ctx.font = '40px VT323'; ctx.fillText(['2.41','18%','312'][i], cx+16, by+50); }
+    ctx.strokeStyle = acc; ctx.lineWidth = 3; ctx.beginPath();
+    for (let k=0;k<=24;k++){ const px = bx + k*bw/24, py = by + bh - 20 - (Math.sin(k*.7 + t*.8)*.5+.5)*(bh-110); k ? ctx.lineTo(px,py) : ctx.moveTo(px,py); }
+    ctx.stroke();
+  } else if (kind === 'dashboard'){
+    for (let i=0;i<4;i++){ const on = i !== 2 || Math.floor(t*2)%2; ctx.fillStyle = on ? (i === 2 ? acc : '#7dff9c') : dim; ctx.beginPath(); ctx.arc(bx+16, by+16+i*34, 9, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = C.dim; ctx.fillRect(bx+36, by+11+i*34, 110, 10); }
+    ctx.strokeStyle = C.dim; ctx.lineWidth = 2; ctx.strokeRect(bx+170, by, bw-170, bh);
+    ctx.font = '20px VT323';
+    for (let i=0;i<7;i++){ ctx.fillStyle = i === 4 ? acc : C.dim; ctx.fillText(['scan ok','hook check','module ok','flag: review','net ok','idle','sync'][i], bx+182, by+24+i*24); }
+  } else if (kind === 'phone'){
+    const pw = 130, ph = bh, px = x + w/2 - pw/2;
+    ctx.strokeStyle = fg; ctx.lineWidth = 3; ctx.strokeRect(px, by, pw, ph);
+    for (let r=0;r<3;r++) for (let c=0;c<3;c++){ ctx.fillStyle = (r+c)%3 === 0 ? acc : C.dim; ctx.fillRect(px+10+c*39, by+12+r*52, 32, 44); }
+    ctx.fillStyle = fg; ctx.font = '22px VT323'; ctx.fillText('★ 8.4', px - 92, by + 40); ctx.fillText('VU ✓', px + pw + 18, by + 40);
+  } else {
+    for (let i=0;i<3;i++){ const tx = bx + 20 + i*(bw-40)/3, tw = (bw-40)/3 - 18, th = tw*.75, ty = by + 30 + (i%2)*24;
+      ctx.fillStyle = C.dim; ctx.fillRect(tx-6, ty-6, tw+12, th+12); ctx.fillStyle = i === 1 ? acc : '#2a1c0b'; ctx.fillRect(tx, ty, tw, th); }
+  }
+  // étiquette « capture à venir »
+  ctx.font = '22px VT323'; const lw = ctx.measureText(UI.shotPlaceholder).width + 20;
+  ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(x + w - lw - 8, y + h - 34, lw, 26);
+  ctx.fillStyle = C.soft; ctx.fillText(UI.shotPlaceholder, x + w - lw + 2, y + h - 15);
+  ctx.restore();
+}
+function drawShot(ctx, i, x, y, w, h, t){
+  const meta = PROJECT_META[i], url = (MEDIA.shots[meta.id] || [])[0], img = getImg(url);
+  if (img){ ctx.fillStyle = '#000'; ctx.fillRect(x, y, w, h); drawCover(ctx, img, x, y, w, h); }
+  else drawMock(ctx, meta.mock, x, y, w, h, t, meta.color);
+  ctx.strokeStyle = C.dim; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
+}
+
+/* ---------- incrustations du magnétoscope ---------- */
+function drawVHSOSD(ctx, t){
+  const el = Math.max(0, t - st.playT);
+  ctx.save(); ctx.font = '44px VT323';
+  const on = el > 3 || Math.floor(el*2.5)%2 === 0;
+  if (on){ ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillText('▶ ' + UI.play, 103, 67); ctx.fillStyle = '#eaffdf'; ctx.fillText('▶ ' + UI.play, 100, 64); }
+  const s = Math.floor(el), tc = `SP ${Math.floor(s/3600)}:${pad2(Math.floor(s/60)%60)}:${pad2(s%60)}`;
+  ctx.font = '34px VT323'; ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillText(tc, 927, 745); ctx.fillStyle = '#eaffdf'; ctx.fillText(tc, 924, 742);
+  ctx.restore();
+}
+
+/* ---------- dessin du canal Projets ---------- */
+function drawProjects(tv, t, active){
+  const ctx = tv.ctx, sec = tv.sec; paintBase(ctx); safeBegin(ctx); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  tv.hits = [];
+  if (st.pview === 'detail' && st.playing >= 0){
+    const i = st.playing, p = CV.projects[i];
+    if (!tv.dlayout || tv.dlayout.i !== i || tv.dlayout.lang !== LANG){ tv.dlayout = {i, lang:LANG, ...layoutProject(ctx, i)}; }
+    drawHeader(ctx, tv, sec.ch, p.title, UI.backList, active, t, 'list');
+    const L = tv.dlayout, viewH = AREA.bottom - AREA.top;
+    ctx.save(); ctx.beginPath(); ctx.rect(80, AREA.top-4, 860, viewH+8); ctx.clip();
+    drawOps(ctx, L.ops, AREA.x, AREA.top - tv.scroll, (o, y) => {
+      if (o.k === 'shot') drawShot(ctx, o.i, AREA.x, y, 420, 262, t);
+      else if (o.k === 'lbl'){ ctx.fillStyle = C.dim; ctx.font = '28px VT323'; ctx.fillText(o.t, AREA.x + o.x, y + 24); }
+      else if (o.k === 'stat'){ ctx.fillStyle = o.color; ctx.fillRect(AREA.x + o.x, y + 6, 14, 26); ctx.fillStyle = C.fg; ctx.font = '36px VT323'; ctx.fillText(o.t, AREA.x + o.x + 26, y + 30); }
+    });
+    ctx.restore();
+    drawScrollbar(ctx, tv.scroll, L.height, coarse);
+    drawVHSOSD(ctx, t);
+    ctx.restore();
+    return;
+  }
+  drawHeader(ctx, tv, sec.ch, sec.title, UI.back, active, t);
+  ctx.fillStyle = C.dim; ctx.font = '28px VT323'; ctx.fillText(UI.listHead, 100, 250);
+  const y0 = 316, lh = 62;
+  CV.projects.forEach((p, i)=>{
+    const y = y0 + i*lh, sel = active && i === st.psel, meta = PROJECT_META[i];
+    if (sel){ ctx.fillStyle = C.fg; ctx.fillRect(86, y-44, 852, 56); }
+    ctx.fillStyle = meta.color; ctx.fillRect(100, y-38, 56, 42);
+    ctx.fillStyle = C.ink; ctx.font = '32px VT323'; ctx.fillText(pad2(i+1), 110, y-8);
+    ctx.fillStyle = sel ? C.ink : C.fg; ctx.font = '46px VT323'; ctx.fillText(fitText(ctx, p.title, 470), 176, y);
+    ctx.font = '28px VT323'; ctx.textAlign = 'right'; ctx.fillStyle = sel ? C.ink : C.dim; ctx.fillText(fitText(ctx, p.status, 250), 924, y-6); ctx.textAlign = 'left';
+    tv.hits.push({x:86, y:y-44, w:852, h:56, act:'proj', i});
+  });
+  ctx.fillStyle = C.dim; ctx.font = '28px VT323';
+  ctx.fillText(coarse ? UI.hintListTouch.toUpperCase() : UI.listFoot, 100, 706);
+  ctx.restore();
+}
+
+/* =========================================================
+   CANAL 12 : terminal caché
+   ========================================================= */
+const G = {fg:'#8dffa4', dim:'#3f8a50', bg0:'#06140a', bg1:'#020703'};
+const term = {lines:[], input:'', hist:[], hi:-1, booted:false};
+function termPrint(x){ for (const l of [].concat(x)) term.lines.push(String(l)); if (term.lines.length > 400) term.lines.splice(0, term.lines.length - 400); }
+function termBoot(){ if (term.booted) return; term.booted = true; termPrint(CV.term.welcome); }
+
+function termRun(raw){
+  const line = raw.trim(); const T = CV.term;
+  termPrint('> ' + line);
+  if (!line) return;
+  term.hist.push(line); term.hi = -1;
+  const [c0, ...args] = line.split(/\s+/); const c = c0.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const arg = args.join(' ');
+  const is = (...names) => names.includes(c);
+  if (is('aide','help','?','h')) termPrint(T.help);
+  else if (is('whoami','qui')) termPrint(T.whoami);
+  else if (is('projets','projects')){
+    termPrint(T.projectsIntro);
+    CV.projects.forEach((p,i)=>termPrint(`  ${pad2(i+1)}  ${p.title}  ·  ${p.status}`));
+    termPrint(T.projectsOutro);
+  }
+  else if (is('projet','project','play','lire')){
+    const n = parseInt(arg, 10);
+    if (!(n >= 1 && n <= CV.projects.length)) termPrint(T.projectBad);
+    else { termPrint(T.projectGo); after(.5, ()=>playProject(n-1, true)); }
+  }
+  else if (is('competences','skills','stack')) termPrint(T.skills);
+  else if (is('formation','education','etudes')) termPrint(T.education);
+  else if (is('contact','mail','email')) termPrint(T.contact);
+  else if (is('noctura','esport')) termPrint(T.noctura);
+  else if (is('ls','dir')) termPrint(T.ls);
+  else if (is('cat','type')){
+    const a = arg.toLowerCase();
+    if (a.includes('secret')) termPrint(T.secret);
+    else if (a.includes('cv')) termPrint(T.cv);
+    else if (a.includes('proj')) termRun('projets');
+    else termPrint(`cat: ${arg || '?'}: ${LANG === 'fr' ? 'introuvable' : 'not found'}`);
+  }
+  else if (is('sudo','su','rm')) termPrint(T.sudo);
+  else if (is('date','time')) termPrint(T.date());
+  else if (is('echo')) termPrint(arg);
+  else if (is('clear','cls','effacer')) term.lines = [];
+  else if (is('lang','langue','language')){
+    const want = arg.toLowerCase().startsWith('en') ? 'en' : arg.toLowerCase().startsWith('fr') ? 'fr' : (LANG === 'fr' ? 'en' : 'fr');
+    setLang(want); termPrint(CV.term.langSet);
+  }
+  else if (is('exit','quit','quitter','sortir','menu','q')){ termPrint(T.exit); after(.4, ()=>tuneTo(2)); }
+  else termPrint(T.unknown(c0));
+}
+
+function drawTerminal(tv, t){
+  const ctx = tv.ctx;
+  const g = ctx.createRadialGradient(CW/2, CH/2, 80, CW/2, CH/2, 720); g.addColorStop(0, G.bg0); g.addColorStop(1, G.bg1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+  safeBegin(ctx); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  tv.hits = [{x:0, y:0, w:CW, h:CH, act:'term'}];
+  ctx.fillStyle = G.dim; ctx.font = '30px VT323'; ctx.fillText(UI.termTitle, 100, 108);
+  ctx.textAlign = 'right'; ctx.fillText(LANG.toUpperCase() + ' · ' + new Date().toLocaleTimeString(LANG === 'fr' ? 'fr-FR' : 'en-GB', {hour:'2-digit', minute:'2-digit'}), 924, 108); ctx.textAlign = 'left';
+  ctx.fillStyle = G.dim; ctx.fillRect(100, 124, 824, 2);
+  ctx.font = '31px VT323';
+  const rows = [];
+  for (const l of term.lines){ if (l === '') { rows.push(''); continue; } for (const w of wrap(ctx, l, 820)) rows.push(w); }
+  const caret = Math.floor(t*2.2)%2 ? '█' : ' ';
+  const inputRows = wrap(ctx, '> ' + term.input + caret, 820);
+  const maxRows = 16, out = rows.slice(-(maxRows - inputRows.length));
+  let y = 168;
+  for (const r of out){ ctx.fillStyle = r.startsWith('> ') ? G.dim : G.fg; ctx.fillText(r, 100, y); y += 33; }
+  ctx.fillStyle = '#c9ffd2'; for (const r of inputRows){ ctx.fillText(r, 100, y); y += 33; }
+  if (coarse && !term.input && document.activeElement !== termInput){ ctx.fillStyle = G.dim; ctx.font = '26px VT323'; ctx.fillText(LANG === 'fr' ? 'TOUCHEZ L’ÉCRAN POUR TAPER' : 'TAP THE SCREEN TO TYPE', 100, 728); }
+  ctx.restore();
+}
+
+/* ---------- construction des télés ---------- */
+const SPECS = [
+  {x:-0.85, z: 0.00, ry: 0.28, w:1.04, h:0.78, base:0.86, style:'grey',  knobs:true },               // menu
+  {x: 0.75, z:-0.45, ry:-0.18, w:0.72, h:0.54, base:1.55, style:'wood',  knobs:false, antenna:true}, // profil
+  {x: 1.90, z: 0.35, ry:-0.55, w:0.96, h:0.72, base:0.45, style:'grey',  knobs:true },               // expérience
+  {x:-2.30, z: 0.80, ry: 0.75, w:0.88, h:0.66, base:0.54, style:'wood',  knobs:true, stand:'media'},               // projets
+  {x:-0.25, z:-1.00, ry: 0.05, w:0.68, h:0.51, base:2.05, style:'cream', knobs:false, tilt:0.14},    // compétences
+  {x:-2.05, z:-0.15, ry: 0.50, w:0.74, h:0.56, base:1.50, style:'grey',  knobs:false, antenna:true}, // formation
+  {x: 2.70, z: 1.35, ry:-0.85, w:0.70, h:0.52, base:1.35, style:'cream', knobs:true },               // contact
+];
+
+function makeRack(w, d, hgt){
+  const g = new THREE.Group(), pole = new THREE.BoxGeometry(.035, hgt, .035);
+  for (const sx of [-1,1]) for (const sz of [-1,1]){
+    const m = new THREE.Mesh(pole, mats.metal); m.position.set(sx*(w/2-.02), hgt/2, sz*(d/2-.02)); g.add(m); }
+  const shelfs = hgt > 1 ? [0.12, hgt*0.5, hgt-0.015] : [0.1, hgt-0.015];
+  for (const y of shelfs){ const s = new THREE.Mesh(new THREE.BoxGeometry(w, .03, d), mats.metal); s.position.y = y; g.add(s); }
+  const led = new THREE.Mesh(new THREE.SphereGeometry(.012,8,6), new THREE.MeshStandardMaterial({color:0x221100, emissive:0xffa030, emissiveIntensity:2}));
+  led.position.set(w/2-.06, hgt-.05, d/2+.005); g.add(led); g.userData.led = led;
+  return g;
+}
+// pieds compas façon mobilier des années 60
+function makeLegs(w, d, hgt, mat){
+  const g = new THREE.Group(), splay = .16;
+  const len = hgt / Math.cos(splay);
+  const geo = new THREE.CylinderGeometry(.02, .011, len, 12);
+  for (const sx of [-1,1]) for (const sz of [-1,1]){
+    const m = new THREE.Mesh(geo, mat);
+    m.rotation.z = sx*splay; m.rotation.x = -sz*splay*.6;
+    m.position.set(sx*(w/2 - .07) + sx*Math.tan(splay)*hgt*.5, hgt/2, sz*(d/2 - .08) + sz*Math.tan(splay*.6)*hgt*.5);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(.013,.013,.025,10), mats.chrome);
+    cap.position.y = -len/2 + .012; m.add(cap);
+    g.add(m);
+  }
+  const rail = new THREE.Mesh(new RoundedBoxGeometry(w - .06, .04, d - .08, 2, .015), mat); rail.position.y = hgt - .02; g.add(rail);
+  return g;
+}
+
+function roundRect(w, h, r){
+  const s = new THREE.Shape(), x = -w/2, y = -h/2;
+  s.moveTo(x+r, y); s.lineTo(x+w-r, y); s.quadraticCurveTo(x+w, y, x+w, y+r);
+  s.lineTo(x+w, y+h-r); s.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  s.lineTo(x+r, y+h); s.quadraticCurveTo(x, y+h, x, y+h-r);
+  s.lineTo(x, y+r); s.quadraticCurveTo(x, y, x+r, y);
+  return s;
+}
+function bezelFrame(ow, oh, iw, ih, ro, ri, depth, bevel, mat){
+  const sh = roundRect(ow, oh, ro); sh.holes.push(roundRect(iw, ih, ri));
+  const geo = new THREE.ExtrudeGeometry(sh, {depth, bevelEnabled:true, bevelThickness:bevel, bevelSize:bevel, bevelSegments:3, curveSegments:10});
+  return new THREE.Mesh(geo, mat);
+}
+function curvedPlane(w, h, bulge){
+  const geo = new THREE.PlaneGeometry(w, h, 32, 24), p = geo.attributes.position;
+  for (let i=0;i<p.count;i++){ const nx = p.getX(i)/(w/2), ny = p.getY(i)/(h/2); p.setZ(i, bulge*(1-nx*nx)*(1-ny*ny)); }
+  geo.computeVertexNormals(); return geo;
+}
+function dialFace(light){
+  return canvasTex(256, 256, (ctx,w,h)=>{
+    const c = w/2;
+    ctx.fillStyle = light ? '#d9d2c2' : '#141416'; ctx.beginPath(); ctx.arc(c,c,c,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = light ? '#2a2620' : '#c9c3b6'; ctx.fillStyle = ctx.strokeStyle;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 30px "IBM Plex Mono", monospace';
+    for (let n=1;n<=12;n++){
+      const a = -n*Math.PI/6; // chiffres dans le sens inverse : tourner à droite fait monter la chaîne
+      ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(c+Math.sin(a)*112, c-Math.cos(a)*112); ctx.lineTo(c+Math.sin(a)*124, c-Math.cos(a)*124); ctx.stroke();
+      ctx.fillText(String(n), c+Math.sin(a)*86, c-Math.cos(a)*86);
+    }
+    const g = ctx.createRadialGradient(c-20,c-20,4,c,c,46); g.addColorStop(0,'#f4f1ea'); g.addColorStop(1,'#77736b');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c,c,44,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(c-5, c-44, 10, 40);
+  });
+}
+function plateTex(text, dark){
+  return canvasTex(256, 64, (ctx,w,h)=>{
+    const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#f0ece4'); g.addColorStop(.5,'#9d988f'); g.addColorStop(1,'#dcd7ce');
+    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle = '#16140f'; ctx.font = '600 30px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, w/2, h/2+2);
+  });
+}
+
+const tvs = [];
+const screens = [];
+SPECS.forEach((s, idx)=>{
+  const d = 0.55, pad = 0.12, side = s.knobs ? 0.26 : 0;
+  const cw = s.w + pad*2 + side, ch = s.h + pad*2 + (s.knobs ? 0 : .06);
+  const radius = s.style === 'cream' ? .06 : s.style === 'wood' ? .028 : .045;
+  const body = mats[s.style];
+  const root = new THREE.Group(); root.position.set(s.x, 0, s.z); root.rotation.y = s.ry; scene.add(root);
+  const legs = s.base < .6;
+  const stand = s.stand === 'media' ? new THREE.Group() /* meuble construit plus loin */ : legs ? makeLegs(cw, d, s.base, s.style === 'wood' ? mats.legWood : mats.chrome) : makeRack(cw + .08, d + .12, s.base);
+  stand.position.x = side/2; root.add(stand);
+
+  const g = new THREE.Group(); g.position.y = s.base + ch/2; if (s.tilt) g.rotation.x = s.tilt; root.add(g);
+  const sy = s.knobs ? 0 : .03;               // écran légèrement remonté quand les boutons sont en bas
+  const front = d/2;
+
+  // caisson arrondi
+  const cab = new THREE.Mesh(new RoundedBoxGeometry(cw, ch, d, 4, radius), body); cab.position.x = side/2; g.add(cab);
+  // tube cathodique : tronc de pyramide à l'arrière
+  const tl = d*.75;
+  const tg = new THREE.CylinderGeometry(.7071*.42, .7071, 1, 4, 1); tg.rotateY(Math.PI/4); tg.scale(cw*.8, tl, ch*.78); tg.rotateX(-Math.PI/2);
+  const tube = new THREE.Mesh(tg, body); tube.position.set(side/2, 0, -front - tl/2 + .02); g.add(tube);
+  // fentes d'aération
+  for (let k=0;k<7;k++){
+    const v = new THREE.Mesh(new THREE.BoxGeometry(cw*.5, .012, .004), mats.vent);
+    v.position.set(side/2, ch*.3 - k*.05, -front - .003); g.add(v);
+  }
+  if (s.style === 'grey'){
+    for (const sx of [-1,1]) for (let k=0;k<6;k++){
+      const v = new THREE.Mesh(new THREE.BoxGeometry(.004, ch*.5, .018), mats.vent);
+      v.position.set(side/2 + sx*(cw/2 + .001), 0, -front*.1 - k*.04); g.add(v);
+    }
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(cw - radius*2, .014, .006), new THREE.MeshStandardMaterial({color:accent.grey, emissive:accent.grey, emissiveIntensity:.08, roughness:.4}));
+    stripe.position.set(side/2, ch/2 - .04, front + .003); g.add(stripe);
+  }
+
+  // encadrement noir laqué + jonc chromé
+  const iw = s.w, ih = s.h;
+  const bez = bezelFrame(iw + .14, ih + .14, iw + .026, ih + .026, .08, .055, .012, .012, mats.bezel); bez.position.set(0, sy, front - .006); g.add(bez);
+  if (s.style !== 'grey'){
+    const trim = bezelFrame(iw + .175, ih + .175, iw + .15, ih + .15, .095, .08, .004, .004, mats.chrome); trim.position.set(0, sy, front - .002); g.add(trim);
+  }
+  // fond du tube (évite de voir le caisson dans les coins arrondis)
+  const well = new THREE.Mesh(new THREE.PlaneGeometry(iw, ih), new THREE.MeshBasicMaterial({color:0x020202}));
+  well.position.set(0, sy, front - .012); g.add(well);
+
+  // écran bombé + vitre
+  const cnv = document.createElement('canvas'); cnv.width = CW; cnv.height = CH;
+  const tex = new THREE.CanvasTexture(cnv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const mat = new THREE.ShaderMaterial({
+    uniforms:{uTex:{value:tex}, uTime:{value:0}, uStatic:{value:.7}, uPower:{value:0}, uBright:{value:.45}, uSeed:{value:idx*17.31}, uTrack:{value:0}},
+    vertexShader:crtVert, fragmentShader:crtFrag, toneMapped:false
+  });
+  const sgeo = curvedPlane(iw, ih, .028);
+  const screen = new THREE.Mesh(sgeo, mat); screen.position.set(0, sy, front - .008); g.add(screen);
+  const glass = new THREE.Mesh(sgeo, mats.glass); glass.userData.skip = true; glass.position.set(0, sy, front - .004); glass.renderOrder = 2; g.add(glass);
+
+  // façade : panneau de commande ou rangée de boutons
+  let dial = null, led;
+  const ledMat = new THREE.MeshStandardMaterial({color:0x220800, emissive:0xff5a1a, emissiveIntensity:0});
+  if (s.knobs){
+    const px = iw/2 + pad/2 + side/2 + .01, pw = side - .02, ph = ch - .08;
+    const panel = new THREE.Mesh(new RoundedBoxGeometry(pw, ph, .02, 3, .012), s.style === 'cream' ? mats.bezel : mats.panel);
+    panel.position.set(px, 0, front + .004); g.add(panel);
+    // sélecteur de canal
+    dial = new THREE.Group(); dial.position.set(px, ph/2 - .11, front + .014); g.add(dial);
+    const skirt = new THREE.Mesh(new THREE.CylinderGeometry(.075, .08, .03, 40), mats.chrome); skirt.rotation.x = Math.PI/2; dial.add(skirt);
+    const body2 = new THREE.Mesh(new THREE.CylinderGeometry(.068, .07, .05, 40), mats.knob); body2.rotation.x = Math.PI/2; body2.position.z = .02; dial.add(body2);
+    const face = new THREE.Mesh(new THREE.CircleGeometry(.064, 40), new THREE.MeshStandardMaterial({map:dialFace(s.style !== 'cream'), roughness:.35, metalness:.2, envMap:envTex, envMapIntensity:.15}));
+    face.position.z = .046; dial.add(face);
+    const ptr = new THREE.Mesh(new THREE.ConeGeometry(.012, .022, 3), mats.chrome); ptr.rotation.z = Math.PI; ptr.position.set(px, ph/2 - .015, front + .016); g.add(ptr);
+    // boutons volume / contraste
+    for (let k=0;k<2;k++){
+      const kn = new THREE.Group(); kn.position.set(px - .045 + k*.09, ph/2 - .27, front + .014); g.add(kn);
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(.03, .033, .04, 28), mats.knob); b.rotation.x = Math.PI/2; kn.add(b);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .006, 28), mats.chrome); cap.rotation.x = Math.PI/2; cap.position.z = .022; kn.add(cap);
+    }
+    // grille du haut-parleur
+    const gh = ph - .47;
+    if (gh > .08){
+      const gr = new THREE.Mesh(new RoundedBoxGeometry(pw - .04, gh, .012, 2, .01), mats.grille);
+      gr.material = gr.material.clone(); gr.material.map = grilleTex.clone(); gr.material.map.repeat.set((pw-.04)/.1, gh/.1); gr.material.map.needsUpdate = true;
+      gr.position.set(px, -ph/2 + .03 + gh/2, front + .012); g.add(gr);
+    }
+    led = new THREE.Mesh(new THREE.SphereGeometry(.009, 12, 8), ledMat); led.position.set(px + pw/2 - .03, ph/2 - .34, front + .016); g.add(led);
+  } else {
+    const by = -ch/2 + .065;
+    for (let k=0;k<3;k++){
+      const kn = new THREE.Mesh(new THREE.CylinderGeometry(.02, .022, .03, 24), k === 0 ? mats.chrome : mats.knob);
+      kn.rotation.x = Math.PI/2; kn.position.set(iw/2 - .03 - k*.065, by, front + .012); g.add(kn);
+    }
+    led = new THREE.Mesh(new THREE.SphereGeometry(.008, 12, 8), ledMat); led.position.set(iw/2 - .23, by, front + .006); g.add(led);
+  }
+  // plaque de modèle
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(.15, .0375), new THREE.MeshStandardMaterial({map:plateTex('DS·' + String(idx+1).padStart(2,'0')), roughness:.25, metalness:.9, envMap:envTex, envMapIntensity:.3}));
+  if (s.knobs) plate.position.set(iw/2 + pad/2 + side/2 + .01, (ch - .08)/2 - .395, front + .016);
+  else plate.position.set(-iw/2 + .1, -ch/2 + .065, front + .003);
+  g.add(plate);
+
+  // antenne « oreilles de lapin »
+  if (s.antenna){
+    const top = ch/2, bx = side/2;
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(.05, 20, 10, 0, Math.PI*2, 0, Math.PI/2), mats.chrome); dome.position.set(bx, top, -.08); g.add(dome);
+    for (const a of [-.42, .5]){
+      const len = .62, rod = new THREE.Mesh(new THREE.CylinderGeometry(.004, .006, len, 8), mats.chrome);
+      rod.position.set(bx - Math.sin(a)*len/2, top + .03 + Math.cos(a)*len/2, -.08); rod.rotation.z = a; g.add(rod);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(.011, 10, 8), mats.chrome);
+      tip.position.set(bx - Math.sin(a)*len, top + .03 + Math.cos(a)*len, -.08); g.add(tip);
+    }
+  }
+
+  const light = new THREE.PointLight(0xffa64a, 0, 3.2, 2); light.position.set(0, .1, front + .7); g.add(light);
+
+  const tv = {idx, spec:s, root, g, screen, mat, tex, cnv, ctx:cnv.getContext('2d'), light, rack:stand, dial, led,
+    dialA: (idx === 0 ? 2 : idx + 1) * Math.PI/6,
+    kind: idx===0 ? 'menu' : 'section', sec: idx===0 ? null : CV.sections[idx-1],
+    power:0, powerT:0, stat:.7, statT:.7, bright:.45, brightT:.45, burst:0, track:0,
+    scroll:0, scrollT:0, layout:null, dlayout:null, hits:[], hover:null, dirty:true, cw, ch, d, side};
+  if (dial){ dial.rotation.z = -tv.dialA; dial.traverse(o => { if (o.isMesh) o.userData.dialOf = tv; }); }
+  screen.userData.tv = tv;
+  tvs.push(tv); screens.push(screen);
+});
+
+// câbles qui partent de chaque télé vers un boîtier au mur
+scene.updateMatrixWorld(true);
+const hub = new THREE.Vector3(0.6, 0.02, -1.6);
+const junction = new THREE.Mesh(new THREE.BoxGeometry(.5,.36,.12), mats.metal); junction.position.set(0.6, 0.5, -1.68); scene.add(junction);
+for (const tv of tvs){
+  const a = new THREE.Vector3(0, 0, -0.55*.77 - .15).applyMatrix4(tv.g.matrixWorld);
+  const b = new THREE.Vector3(a.x*.7 + hub.x*.3, 0.03, a.z*.5 + hub.z*.5 + .2);
+  const c = new THREE.Vector3(hub.x + (Math.random()-.5)*.3, 0.02, hub.z + .15);
+  const curve = new THREE.CatmullRomCurve3([a, new THREE.Vector3(a.x, a.y*.4, a.z - .1), b, c, new THREE.Vector3(0.6, .35, -1.62)]);
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 40, .011, 6, false), mats.rubber));
+}
+// caisses
+[[-1.35,.19,1.75,.38,.38,.42,.3],[1.05,.17,2.15,.46,.34,.36,-.4],[1.25,.12,1.85,.3,.24,.3,.2],[-3.0,.22,-1.2,.5,.44,.44,.1]].forEach(([x,y,z,w,h,d,r])=>{
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mats.crate); m.position.set(x,y,z); m.rotation.y = r; scene.add(m); });
+
+// poussière
+const dustN = 380, dustPos = new Float32Array(dustN*3);
+for (let i=0;i<dustN;i++){ dustPos[i*3] = (Math.random()-.5)*6.5; dustPos[i*3+1] = Math.random()*3.4; dustPos[i*3+2] = -1.6 + Math.random()*5; }
+const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos,3));
+const dustTex = canvasTex(64,64,(ctx)=>{ const g = ctx.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,220,170,1)'); g.addColorStop(1,'rgba(255,220,170,0)'); ctx.fillStyle = g; ctx.fillRect(0,0,64,64); });
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({size:.018, map:dustTex, transparent:true, opacity:.45, depthWrite:false, blending:THREE.AdditiveBlending, color:0xffd9a8}));
+dust.raycast = () => {}; scene.add(dust);
+
+
+/* =========================================================
+   DÉCOR INTERACTIF : meuble TV, magnétoscope, cassettes, lampe
+   ========================================================= */
+const V3 = THREE.Vector3;
+function rod(a, b, r, mat){
+  const dir = new V3().subVectors(b, a), len = dir.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 12), mat);
+  m.position.copy(a).addScaledVector(dir, .5);
+  m.quaternion.setFromUnitVectors(new V3(0,1,0), dir.normalize());
+  return m;
+}
+
+/* ---------- meuble TV (sous la télé Projets) ---------- */
+const media = {tv: tvs[3], tapes: [], playing: -1};
+(function buildMedia(){
+  const tv = media.tv, root = tv.root, H = tv.spec.base;
+  const x0 = -1.18, x1 = .9, W = x1 - x0, cx = (x0 + x1)/2, D = .66, z0 = -.36, zc = z0 + D/2, legH = .1;
+  const g = new THREE.Group(); root.add(g); media.group = g;
+  const wood = mats.wood;
+  const top = new THREE.Mesh(new RoundedBoxGeometry(W, .045, D, 3, .012), wood); top.position.set(cx, H - .0225, zc); g.add(top);
+  const bot = new THREE.Mesh(new THREE.BoxGeometry(W - .04, .03, D - .04), wood); bot.position.set(cx, legH + .015, zc); g.add(bot);
+  for (const x of [x0 + .015, x1 - .015, -.2]){
+    const sd = new THREE.Mesh(new THREE.BoxGeometry(.03, H - legH - .045, D - .02), wood); sd.position.set(x, legH + (H - legH - .045)/2, zc); g.add(sd);
+  }
+  const back = new THREE.Mesh(new THREE.BoxGeometry(W - .03, H - legH - .045, .015), mats.bezel); back.position.set(cx, legH + (H - legH)/2, z0 + .01); g.add(back);
+  // portes à droite, poignées chromées
+  const doorW = (x1 - .015 - (-.2 + .015)) / 2;
+  for (let k=0;k<2;k++){
+    const dx = -.2 + .015 + doorW*(k + .5);
+    const door = new THREE.Mesh(new RoundedBoxGeometry(doorW - .012, H - legH - .07, .022, 2, .006), wood);
+    door.position.set(dx, legH + (H - legH)/2 - .01, z0 + D - .005); g.add(door);
+    const hd = new THREE.Mesh(new THREE.CylinderGeometry(.007, .007, .12, 10), mats.chrome);
+    hd.position.set(dx + (k ? -1 : 1)*(doorW/2 - .05), legH + (H - legH)/2, z0 + D + .022); g.add(hd);
+  }
+  // pieds compas
+  for (const sx of [x0 + .1, x1 - .1]) for (const sz of [z0 + .08, z0 + D - .08]){
+    const lg = new THREE.Mesh(new THREE.CylinderGeometry(.018, .01, legH + .02, 10), mats.legWood);
+    lg.position.set(sx, legH/2, sz); g.add(lg);
+  }
+
+  /* ---------- magnétoscope ---------- */
+  const vcr = new THREE.Group(); vcr.position.set((x0 - .2)/2, legH + .03 + .065, z0 + D - .23); g.add(vcr); media.vcr = vcr;
+  const vw = .72, vh = .14, vd = .42;
+  vcr.add(new THREE.Mesh(new RoundedBoxGeometry(vw, vh, vd, 2, .01), mats.grey));
+  const face = new THREE.Mesh(new THREE.BoxGeometry(vw - .02, vh - .03, .006), mats.bezel); face.position.z = vd/2 + .002; vcr.add(face);
+  // fente + clapet
+  const slotX = -.12, slotY = .016;
+  const slot = new THREE.Mesh(new THREE.BoxGeometry(.4, .064, .01), new THREE.MeshBasicMaterial({color:0x010101})); slot.position.set(slotX, slotY, vd/2 + .004); vcr.add(slot);
+  const hinge = new THREE.Group(); hinge.position.set(slotX, slotY + .032, vd/2 + .009); vcr.add(hinge);
+  const flap = new THREE.Mesh(new THREE.BoxGeometry(.395, .062, .006), mats.grey); flap.position.y = -.031; hinge.add(flap);
+  media.flap = hinge; media.flapT = 0;
+  // afficheur
+  const dc = document.createElement('canvas'); dc.width = 256; dc.height = 64;
+  const dtex = new THREE.CanvasTexture(dc); dtex.colorSpace = THREE.SRGBColorSpace;
+  const disp = new THREE.Mesh(new THREE.PlaneGeometry(.16, .04), new THREE.MeshBasicMaterial({map:dtex, toneMapped:false}));
+  disp.position.set(.2, .022, vd/2 + .007); vcr.add(disp);
+  media.display = {cnv:dc, ctx:dc.getContext('2d'), tex:dtex, last:''};
+  for (let k=0;k<5;k++){ const b = new THREE.Mesh(new THREE.BoxGeometry(.03, .012, .01), mats.knob); b.position.set(.13 + k*.036, -.034, vd/2 + .008); vcr.add(b); }
+  const vled = new THREE.Mesh(new THREE.SphereGeometry(.006, 10, 8), new THREE.MeshStandardMaterial({color:0x220000, emissive:0xff3020, emissiveIntensity:0}));
+  vled.position.set(-.34, .03, vd/2 + .008); vcr.add(vled); media.vled = vled;
+  const vplate = new THREE.Mesh(new THREE.PlaneGeometry(.1, .025), new THREE.MeshStandardMaterial({map:plateTex('DS·VCR'), roughness:.3, metalness:.9, envMap:envTex, envMapIntensity:.3}));
+  vplate.position.set(-.27, -.042, vd/2 + .007); vcr.add(vplate);
+  media.slotLocal = new V3(slotX, slotY, vd/2).add(vcr.position); // dans le repère du meuble (= télé)
+
+  /* ---------- cassettes empilées sur le meuble ---------- */
+  const tw = .36, th = .055, td = .21, pileX = -.86, pileZ = z0 + D - .15;
+  const shell = new THREE.MeshStandardMaterial({color:0x111113, roughness:.45, metalness:.1, envMap:envTex, envMapIntensity:.1});
+  PROJECT_META.forEach((meta, i)=>{
+    const t = new THREE.Group();
+    const body = new THREE.Mesh(new RoundedBoxGeometry(tw, th, td, 2, .006), shell); t.add(body);
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(tw - .03, th - .012), new THREE.MeshStandardMaterial({roughness:.7}));
+    lab.position.z = td/2 + .001; t.add(lab);
+    const win = new THREE.Mesh(new THREE.PlaneGeometry(.12, .06), new THREE.MeshStandardMaterial({color:0x1d1a16, roughness:.2, metalness:.3}));
+    win.rotation.x = -Math.PI/2; win.position.set(0, th/2 + .001, -.01); t.add(win);
+    const k = PROJECT_META.length - 1 - i;              // la cassette 01 est en haut de la pile
+    const home = new V3(pileX + Math.sin(i*2.3)*.012, H + th/2 + k*(th + .002), pileZ + Math.cos(i*1.7)*.01);
+    const homeRot = Math.sin(i*1.9)*.07;
+    t.position.copy(home); t.rotation.y = homeRot; g.add(t);
+    t.traverse(o => { if (o.isMesh) o.userData.tape = i; });
+    media.tapes.push({i, group:t, label:lab, home, homeRot, anim:null, inVCR:false});
+  });
+  media.tapeDepth = td;
+  refreshTapeLabels();
+})();
+
+function refreshTapeLabels(){
+  media.tapes.forEach(tp => {
+    const meta = PROJECT_META[tp.i], p = CV.projects[tp.i];
+    const tex = canvasTex(512, 64, (ctx, w, h)=>{
+      ctx.fillStyle = '#efe7d4'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = meta.color; ctx.fillRect(0, 0, 70, h);
+      ctx.fillStyle = '#1a1712'; ctx.font = '600 30px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+      ctx.fillText(pad2(tp.i + 1), 12, h/2 + 2);
+      ctx.font = '600 26px "IBM Plex Mono", monospace';
+      let s = p.tape; while (ctx.measureText(s).width > w - 100 && s.length > 3) s = s.slice(0, -1);
+      ctx.fillText(s, 88, h/2 + 2);
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(70, h - 6, w - 70, 2);
+    });
+    if (tp.label.material.map) tp.label.material.map.dispose();
+    tp.label.material.map = tex; tp.label.material.needsUpdate = true;
+  });
+}
+
+// trajet d'une cassette : pile → devant → fente du magnétoscope → dedans
+function tapePath(tp, toVCR){
+  const s = media.slotLocal, td = media.tapeDepth;
+  const out = tp.home.clone().add(new V3(0, .02, .3));
+  const front = new V3(s.x, s.y, s.z + td/2 + .22), mouth = new V3(s.x, s.y, s.z + td/2 + .01), inside = new V3(s.x, s.y, s.z - td/2 - .015);
+  const pts = [tp.home.clone(), out, front, mouth, inside];
+  const durs = [.32, .5, .28, .34];
+  return toVCR ? {pts, durs, rot:[tp.homeRot, 0, 0, 0, 0]} : {pts: pts.slice().reverse(), durs: durs.slice().reverse(), rot:[0, 0, 0, 0, tp.homeRot]};
+}
+function animateTape(tp, toVCR, done){
+  const p = tapePath(tp, toVCR);
+  tp.anim = {...p, seg:0, t:0, done};
+  tp.inVCR = toVCR;
+}
+function updateTapes(dt){
+  for (const tp of media.tapes){
+    const a = tp.anim; if (!a) continue;
+    a.t += dt / (a.durs[a.seg] * M);
+    const k = Math.min(1, a.t), e = k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
+    tp.group.position.lerpVectors(a.pts[a.seg], a.pts[a.seg + 1], e);
+    tp.group.rotation.y = a.rot[a.seg] + (a.rot[a.seg + 1] - a.rot[a.seg]) * e;
+    if (a.t >= 1){ a.seg++; a.t = 0; if (a.seg >= a.durs.length){ tp.anim = null; a.done && a.done(); } }
+  }
+  const wantOpen = media.tapes.some(tp => tp.anim && tp.anim.seg >= 2);
+  media.flapT += ((wantOpen ? 1 : 0) - media.flapT) * Math.min(1, dt*12);
+  media.flap.rotation.x = media.flapT * 1.25;
+}
+function drawVCRDisplay(t){
+  const D = media.display, playing = media.playing >= 0;
+  const el = playing ? Math.max(0, Math.floor(t - st.playT)) : 0;
+  const txt = playing ? `▶ ${pad2(Math.floor(el/60))}:${pad2(el%60)}` : (Math.floor(t)%2 ? '--:--' : '-- --');
+  if (txt === D.last) return; D.last = txt;
+  const ctx = D.ctx; ctx.fillStyle = '#030605'; ctx.fillRect(0, 0, 256, 64);
+  ctx.fillStyle = '#6fffd2'; ctx.font = '44px VT323, monospace'; ctx.textBaseline = 'middle'; ctx.fillText(txt, 14, 34);
+  ctx.font = '20px VT323, monospace'; ctx.fillStyle = playing ? '#6fffd2' : '#1d4a3c'; ctx.fillText('SP  HI-FI', 172, 34);
+  D.tex.needsUpdate = true;
+}
+
+/* ---------- lampe articulée posée sur la télé du menu ---------- */
+const lamp = {meshes: []};
+(function buildLamp(){
+  const tv = tvs[0], g = tv.g, top = tv.ch/2;
+  const bx = -tv.cw/2 + tv.side/2 + .2, bz = -.08;
+  const B = new V3(bx, top, bz), J = new V3(bx - .02, top + .15, bz - .05), Hd = new V3(bx + .03, top + .2, bz + .17);
+  const P = new V3(bx + .15, top - .4, tv.d/2 + .55);
+  const black = mats.knob, chrome = mats.chrome;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.06, .07, .02, 24), black); base.position.copy(B).add(new V3(0, .01, 0)); g.add(base);
+  const parts = [base, rod(B, J, .008, chrome), rod(J, Hd, .008, chrome)];
+  const joint = new THREE.Mesh(new THREE.SphereGeometry(.016, 12, 10), black); joint.position.copy(J); parts.push(joint);
+  const dir = new V3().subVectors(P, Hd).normalize();
+  const shade = new THREE.Mesh(new THREE.ConeGeometry(.065, .11, 24, 1, true), new THREE.MeshStandardMaterial({color:0xb5452a, roughness:.45, metalness:.3, side:THREE.DoubleSide, envMap:envTex, envMapIntensity:.15}));
+  shade.position.copy(Hd).addScaledVector(dir, .035); shade.quaternion.setFromUnitVectors(new V3(0,1,0), dir.clone().negate()); parts.push(shade);
+  const bulbM = new THREE.MeshStandardMaterial({color:0xffe0b0, emissive:0xffb060, emissiveIntensity:2.5});
+  const lb = new THREE.Mesh(new THREE.SphereGeometry(.022, 12, 10), bulbM); lb.position.copy(Hd).addScaledVector(dir, .06); parts.push(lb);
+  parts.forEach(m => { g.add(m); m.userData.lamp = true; lamp.meshes.push(m); });
+  // zone de clic plus large que la lampe, invisible
+  const hit = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshBasicMaterial({visible:false}));
+  hit.position.copy(Hd); hit.userData.lamp = true; g.add(hit); lamp.meshes.push(hit);
+  const spot = new THREE.SpotLight(0xffc27a, 4, 4, .7, .55, 2);
+  spot.position.copy(lb.position); g.add(spot);
+  const tgt = new THREE.Object3D(); tgt.position.copy(P); g.add(tgt); spot.target = tgt;
+  lamp.spot = spot; lamp.bulbM = bulbM;
+})();
+
+/* ---------- caméra ---------- */
+const V = THREE.Vector3;
+function viewFor(tv, menu, close = false){
+  tv.screen.updateWorldMatrix(true, false);
+  const center = tv.screen.getWorldPosition(new V());
+  const n = new V(0,0,1).transformDirection(tv.screen.matrixWorld);
+  const r = new V(1,0,0).transformDirection(tv.screen.matrixWorld);
+  const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov/2)), asp = camera.aspect, s = tv.spec;
+  const wide = asp > 1.15;
+  if (!menu && !close && s.stand === 'media' && wide){
+    // canal Projets : on cadre aussi le meuble, la pile de cassettes et le magnétoscope
+    const m = tv.root.localToWorld(new V(-.5, .42, .2));
+    const target = center.clone().lerp(m, .42);
+    const dH = (1.5*1.08/2)/tan, dW = (2.15*1.08/2)/(tan*asp);
+    return {pos: target.clone().addScaledVector(n, Math.max(dH, dW)).add(new V(0, .12, 0)), target};
+  }
+  const fh = menu && wide ? 2.25 : 1.36, fw = menu && wide ? 1.6 : 1.2;
+  const sh = menu && wide ? s.w*.32 : 0;
+  const cabHalf = s.w/2 + .12 + (s.knobs ? .26 : 0) + .1;
+  const d = Math.max((s.h*fh/2)/tan, (s.w*fw/2)/(tan*asp), menu ? (cabHalf + sh)/(tan*asp) : 0);
+  const target = center.clone(), pos = center.clone().addScaledVector(n, d);
+  if (sh){ target.addScaledVector(r, sh); pos.addScaledVector(r, sh); pos.y += .05; }
+  return {pos, target};
+}
+function sectionView(i){ return viewFor(tvs[i+1], false, !!CV.sections[i].projects && st.pview === 'detail'); }
+const overview = {pos:new V(0.3,1.75,5.4), target:new V(-0.1,1.3,0)};
+const camPos = overview.pos.clone(), camTgt = overview.target.clone();
+let tween = null;
+function moveCam(view, dur, lift=0.3){ tween = {fp:camPos.clone(), ft:camTgt.clone(), tp:view.pos.clone(), tt:view.target.clone(), t:0, dur:Math.max(.05,dur), lift}; }
+const ease = k => k<.5 ? 4*k*k*k : 1 - Math.pow(-2*k+2,3)/2;
+
+/* ---------- son (synthétisé) ---------- */
+const sfx = {
+  ctx:null, master:null, on:true, nbuf:null,
+  init(){
+    try{
+      this.ctx = new (window.AudioContext||window.webkitAudioContext)();
+      this.master = this.ctx.createGain(); this.master.gain.value = this.on ? .6 : 0; this.master.connect(this.ctx.destination);
+      const len = this.ctx.sampleRate; this.nbuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const d = this.nbuf.getChannelData(0); for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+      const hum = this.ctx.createGain(); hum.gain.value = .014; hum.connect(this.master);
+      for (const [f,v] of [[50,1],[100,.45],[150,.15]]){ const o = this.ctx.createOscillator(), g = this.ctx.createGain(); o.frequency.value = f; g.gain.value = v; o.connect(g).connect(hum); o.start(); }
+      const rs = this.ctx.createBufferSource(); rs.buffer = this.nbuf; rs.loop = true;
+      const lp = this.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
+      const rg = this.ctx.createGain(); rg.gain.value = .02; rs.connect(lp).connect(rg).connect(this.master); rs.start();
+    }catch(e){ this.ctx = null; }
+  },
+  beep(f, dur, type='square', vol=.04, delay=0){
+    const c = this.ctx; if (!c) return; const t0 = c.currentTime + delay;
+    const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0+.005); g.gain.exponentialRampToValueAtTime(.0001, t0+dur);
+    o.connect(g).connect(this.master); o.start(t0); o.stop(t0+dur+.03);
+  },
+  noise(dur, f0, f1, vol, q=1){
+    const c = this.ctx; if (!c) return; const t0 = c.currentTime;
+    const s = c.createBufferSource(); s.buffer = this.nbuf;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+    bp.frequency.setValueAtTime(f0, t0); bp.frequency.exponentialRampToValueAtTime(f1, t0+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0+dur*.35); g.gain.exponentialRampToValueAtTime(.0001, t0+dur);
+    s.connect(bp).connect(g).connect(this.master); s.start(t0); s.stop(t0+dur+.05);
+  },
+  tick(){ this.beep(1500,.035,'square',.02); },
+  select(){ this.beep(660,.07,'square',.035); this.beep(990,.1,'square',.035,.06); },
+  back(){ this.beep(560,.07,'square',.03); this.beep(370,.1,'square',.03,.06); },
+  whoosh(){ this.noise(.9*M, 280, 2400, .07, .7); },
+  powerOn(){ this.noise(.28, 1800, 300, .09, .6); this.beep(85,.4,'sine',.13); this.beep(7800,.5,'sine',.004,.05); },
+  knob(){ this.beep(180,.03,'square',.05); this.noise(.06, 3000, 1500, .05, 2); },
+  zap(){ this.noise(.22, 4000, 2500, .07, .4); },
+  key(){ this.beep(2200 + Math.random()*400, .015, 'square', .012); },
+  sw(){ this.beep(900,.02,'square',.05); this.noise(.04, 5000, 3000, .05, 3); },
+  insert(){ this.noise(.25, 600, 200, .1, 1.5); this.beep(70,.18,'sine',.15,.05); this.noise(.9, 300, 320, .035, 4); },
+  eject(){ this.beep(90,.12,'sine',.12); this.noise(.3, 300, 900, .07, 1.2); },
+  setOn(v){ this.on = v; if (this.master) this.master.gain.setTargetAtTime(v ? .6 : 0, this.ctx.currentTime, .05); }
+};
+
+
+/* =========================================================
+   ÉTAT ET ACTIONS
+   ========================================================= */
+const st = {mode:'boot', sel:0, cur:-1, busy:true, tune:2, dialPos:2, pview:'list', psel:0, playing:-1, playT:0, loading:false};
+let clockT = 0, lightsOn = true;
+const timers = [];
+const after = (s, fn) => timers.push({at:clockT + s, fn});
+const chan = $('chan'), hint = $('hint'), backBtn = $('backBtn'), linksEl = $('links'), termInput = $('termInput');
+const sndBtn = $('sndBtn'), lightBtn = $('lightBtn'), langBtn = $('langBtn');
+const PROJ = CV.sections.findIndex(s => s.projects);   // index de la section Projets
+
+refreshToggles = () => {
+  sndBtn.textContent = sfx.on ? UI.soundOn : UI.soundOff; sndBtn.setAttribute('aria-pressed', String(sfx.on));
+  lightBtn.textContent = lightsOn ? UI.lightOn : UI.lightOff; lightBtn.setAttribute('aria-pressed', String(lightsOn));
+};
+refreshToggles();
+sndBtn.onclick = () => { sfx.setOn(!sfx.on); refreshToggles(); };
+lightBtn.onclick = () => { toggleLights(); };
+langBtn.onclick = () => { setLang(LANG === 'fr' ? 'en' : 'fr'); };
+
+function tuneLabel(n){
+  if (n === 1) return UI.mireSub.toLowerCase();
+  if (n >= 2 && n <= 7) return CV.sections[n-2].label.toLowerCase();
+  if (n === 12) return 'terminal';
+  return UI.noSignal.toLowerCase();
+}
+function hud(){
+  const touch = coarse;
+  let h = '';
+  if (st.mode === 'menu'){
+    chan.textContent = `${UI.ch} ${pad2(st.tune)} · ${tuneLabel(st.tune)}`;
+    h = st.tune === 12 ? UI.hintTerm : st.tune === 1 ? UI.hintMire : st.tune > 7 ? UI.hintNoSignal : (touch ? UI.hintMenuTouch : UI.hintMenu);
+  } else if (st.mode === 'section'){
+    const s = CV.sections[st.cur];
+    chan.textContent = `${UI.ch} ${s.ch.replace('CH ','')} · ${s.label.toLowerCase()}`;
+    if (s.projects) h = st.pview === 'detail' ? (touch ? UI.hintDetailTouch : UI.hintDetail) : (touch ? UI.hintListTouch : UI.hintList);
+    else h = touch ? UI.hintSectionTouch : UI.hintSection;
+  } else chan.textContent = UI.chStandby;
+  hint.textContent = h;
+  backBtn.hidden = !(coarse && st.mode === 'section');
+  document.body.classList.toggle('has-back', !backBtn.hidden);
+  updateLinks();
+}
+function updateLinks(){
+  let links = [];
+  if (st.mode === 'section' && !st.busy){
+    const s = CV.sections[st.cur];
+    if (s.links) links = s.links;
+    if (s.projects && st.pview === 'detail' && st.playing >= 0){
+      const p = CV.projects[st.playing], m = PROJECT_META[st.playing];
+      if (m.link && p.linkLabel) links = [{href:m.link, label:p.linkLabel}];
+    }
+  }
+  const key = links.map(l => l.href + l.label).join('|');
+  if (linksEl.dataset.key === key) return;
+  linksEl.dataset.key = key;
+  linksEl.innerHTML = links.map(l => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('');
+  linksEl.hidden = !links.length;
+}
+
+function setActive(tv){ tv.statT = 0; tv.brightT = 1.55; }
+function setIdle(tv){ tv.statT = .62; tv.brightT = .42; }
+
+function start(){
+  if (st.mode !== 'boot') return;
+  st.mode = 'intro';
+  sfx.init();
+  $('boot').classList.add('off');
+  setTimeout(()=>$('boot').remove(), 900);
+  glCanvas.focus();
+  moveCam(viewFor(tvs[0], true), 2.6*M, 0.2);
+  tvs.slice(1).forEach((tv,i)=>{ after((.35 + i*.16)*M, ()=>{ tv.power = 0; tv.powerT = 1; setIdle(tv); sfx.beep(70 + i*6, .18, 'sine', .05); }); });
+  after(1.7*M, ()=>{ const m = tvs[0]; m.power = 0; m.powerT = 1; setActive(m); sfx.powerOn(); });
+  after(2.4*M, ()=>{ st.mode = 'menu'; st.busy = false; hud(); });
+}
+
+function openSection(i, then){
+  if (st.busy || i < 0 || i >= CV.sections.length) return;
+  if (st.mode === 'section' && st.cur === i){ then && then(); return; }
+  const prev = st.mode === 'section' ? tvs[st.cur+1] : tvs[0];
+  const tv = tvs[i+1];
+  st.busy = true; st.mode = 'section'; st.cur = i; st.sel = i;
+  if (st.tune >= 2 && st.tune <= 7) syncTune(i + 2);
+  termInput.blur();
+  setIdle(prev); prev.dirty = true;
+  tv.scroll = tv.scrollT = 0; tv.hover = null;
+  if (CV.sections[i].projects){ st.pview = st.playing >= 0 ? 'detail' : 'list'; }
+  sfx.select(); sfx.whoosh();
+  moveCam(sectionView(i), 1.15*M, .28);
+  after(.5*M, ()=>{ tv.power = 0; tv.powerT = 1; setActive(tv); sfx.powerOn(); });
+  after(1.15*M, ()=>{ st.busy = false; hud(); then && then(); });
+  hud();
+}
+function goMenu(){
+  if (st.busy || st.mode !== 'section') return;
+  const tv = tvs[st.cur+1], m = tvs[0];
+  st.busy = true; st.mode = 'menu';
+  if (st.tune >= 2 && st.tune <= 7) st.sel = st.tune - 2;
+  setIdle(tv); tv.hover = null; tv.dirty = true;
+  sfx.back(); sfx.whoosh();
+  moveCam(viewFor(m, true), 1.0*M, .25);
+  after(.45*M, ()=>{ m.power = 0; m.powerT = 1; setActive(m); sfx.powerOn(); if (st.tune === 12 && !coarse) termInput.focus({preventScroll:true}); });
+  after(1.0*M, ()=>{ st.busy = false; hud(); });
+  hud();
+}
+
+/* ---------- sélecteur de chaîne (télé principale) ---------- */
+function nearestDial(n){ const d = ((n - st.tune + 18) % 12) - 6; return st.dialPos + d; }
+function syncTune(n){ st.dialPos = nearestDial(n); st.tune = n; }
+function tuneTo(n, fromDial = false){
+  if (st.mode !== 'menu' || st.busy) return;
+  n = ((n - 1) % 12 + 12) % 12 + 1;
+  if (n === st.tune) return;
+  syncTune(n);
+  if (n >= 2 && n <= 7) st.sel = n - 2;
+  const m = tvs[0];
+  m.burst = 1; sfx.knob(); sfx.zap();
+  if (n === 12){ termBoot(); if (!coarse || fromDial) termInput.focus({preventScroll:true}); }
+  else termInput.blur();
+  hud();
+}
+function stepTune(delta){ tuneTo(st.tune + delta, true); }
+
+/* ---------- cassettes et magnétoscope ---------- */
+function playProject(i, fromTerm = false){
+  if (i < 0 || i >= CV.projects.length || st.loading) return;
+  if (st.mode !== 'section' || st.cur !== PROJ){
+    if (st.mode === 'section' || st.mode === 'menu') openSection(PROJ, () => playProject(i));
+    return;
+  }
+  if (media.playing === i && st.pview === 'detail') return;
+  st.loading = true; st.psel = i;
+  const tv = tvs[PROJ+1];
+  const old = media.tapes.find(tp => tp.inVCR);
+  if (old){
+    const o = tapePath(old, false); o.durs = o.durs.map(x => x*.5);
+    old.anim = {...o, seg:0, t:0, done:null}; old.inVCR = false;
+    sfx.eject();
+  }
+  media.playing = -1; st.playing = -1; st.pview = 'list'; tv.dirty = true;
+  const tp = media.tapes[i];
+  sfx.select();
+  after(.15, ()=>sfx.insert());
+  animateTape(tp, true, () => {
+    media.playing = i; st.playing = i; st.pview = 'detail'; st.playT = clockT; st.loading = false;
+    tv.scroll = tv.scrollT = 0; tv.dlayout = null; tv.track = 1; tv.burst = .6; tv.dirty = true;
+    sfx.beep(1200, .05, 'square', .03);
+    moveCam(sectionView(PROJ), .9*M, .05);   // on s'approche de l'écran pour lire
+    hud();
+  });
+  hud();
+}
+function ejectToList(){
+  if (st.loading) return;
+  const tv = tvs[PROJ+1];
+  const tp = media.tapes.find(x => x.inVCR);
+  if (tp){ animateTape(tp, false, null); sfx.eject(); }
+  media.playing = -1; st.playing = -1; st.pview = 'list'; tv.burst = .7; tv.scroll = tv.scrollT = 0; tv.dirty = true;
+  moveCam(sectionView(PROJ), .9*M, .05);     // on recule pour revoir les cassettes
+  hud();
+}
+
+/* ---------- lumière, langue ---------- */
+function toggleLights(){ lightsOn = !lightsOn; sfx.sw(); refreshToggles(); }
+function setLang(l){
+  if (l === LANG || !CONTENT[l]) return;
+  LANG = l; CV = CONTENT[l]; UI = CV.ui;
+  try { localStorage.setItem('ds-lang', l); } catch(e){}
+  for (const tv of tvs){ if (tv.idx > 0){ tv.sec = CV.sections[tv.idx-1]; tv.layout = layoutSection(tv.ctx, tv.sec); } tv.dlayout = null; tv.dirty = true; }
+  refreshTapeLabels();
+  applyLangDOM();
+  hud();
+}
+
+function scrollBy(dy){
+  if (st.mode !== 'section') return;
+  const tv = tvs[st.cur+1];
+  const L = CV.sections[st.cur].projects ? (st.pview === 'detail' ? tv.dlayout : null) : tv.layout;
+  if (!L) return;
+  const max = Math.max(0, L.height - (AREA.bottom - AREA.top));
+  tv.scrollT = THREE.MathUtils.clamp(tv.scrollT + dy, 0, max);
+}
+
+/* =========================================================
+   CLAVIER, SOURIS, TACTILE
+   ========================================================= */
+const bootEl = $('boot');
+bootEl.addEventListener('click', start);
+addEventListener('keydown', e => { if (st.mode === 'boot' && !bootEl.hidden && !e.metaKey && !e.ctrlKey && textcv.hidden){ e.preventDefault(); start(); } }, {capture:true});
+
+const termActive = () => st.mode === 'menu' && st.tune === 12 && !st.busy;
+
+/* ---------- saisie du terminal (champ caché, marche aussi sur mobile) ---------- */
+termInput.addEventListener('input', () => {
+  if (!termActive()){ termInput.value = ''; return; }
+  term.input = termInput.value.slice(0, 120); termInput.value = term.input; sfx.key();
+});
+termInput.addEventListener('keydown', e => {
+  if (!termActive()) return;
+  if (e.key === 'Enter'){ e.preventDefault(); termRun(term.input); term.input = ''; termInput.value = ''; }
+  else if (e.key === 'Escape'){ e.preventDefault(); termInput.blur(); tuneTo(2); }
+  else if (e.key === 'ArrowUp' || e.key === 'ArrowDown'){
+    e.preventDefault(); if (!term.hist.length) return;
+    term.hi = term.hi < 0 ? term.hist.length : term.hi;
+    term.hi = THREE.MathUtils.clamp(term.hi + (e.key === 'ArrowUp' ? -1 : 1), 0, term.hist.length);
+    term.input = term.hist[term.hi] || ''; termInput.value = term.input;
+  }
+  else if (e.key === 'PageUp' || e.key === 'PageDown'){ e.preventDefault(); stepTune(e.key === 'PageUp' ? 1 : -1); }
+  else if (e.key === 'Tab') e.preventDefault();
+});
+
+/* ---------- clavier ---------- */
+addEventListener('keydown', e => {
+  if (!textcv.hidden){ if (e.key === 'Escape') $('closeTxt').click(); return; }
+  const k = e.key;
+  if (e.target === termInput) return;
+  if ((e.target.tagName === 'BUTTON' || e.target.tagName === 'A') && (k === 'Enter' || k === ' ')) return; // le bouton garde sa touche
+  if (st.mode === 'boot' || st.mode === 'intro' || st.busy || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (termActive()){
+    // le terminal reprend la main si le champ a perdu le focus
+    if (k === 'Escape'){ e.preventDefault(); tuneTo(2); }
+    else if (k === 'PageUp' || k === 'PageDown'){ e.preventDefault(); stepTune(k === 'PageUp' ? 1 : -1); }
+    else if (k.length === 1 || k === 'Enter' || k === 'Backspace'){
+      e.preventDefault(); termInput.focus({preventScroll:true});
+      if (k === 'Enter'){ termRun(term.input); term.input = ''; }
+      else if (k === 'Backspace') term.input = term.input.slice(0, -1);
+      else { term.input += k; sfx.key(); }
+      termInput.value = term.input;
+    }
+    return;
+  }
+  if (k === 'l' || k === 'L'){ toggleLights(); return; }
+  if (st.mode === 'menu'){
+    if (/^[1-6]$/.test(k)){ openSection(+k-1); return; }
+    if (k === 'PageUp' || k === '+' || k === 'PageDown' || k === '-'){ e.preventDefault(); stepTune(k === 'PageUp' || k === '+' ? 1 : -1); return; }
+    const onGuide = st.tune >= 2 && st.tune <= 7;
+    if (k==='ArrowDown' || k==='s' || k==='S'){ e.preventDefault(); if (!onGuide) return tuneTo(2); st.sel = (st.sel+1) % 6; syncTune(st.sel + 2); sfx.tick(); hud(); }
+    else if (k==='ArrowUp' || k==='z' || k==='w' || k==='Z' || k==='W'){ e.preventDefault(); if (!onGuide) return tuneTo(7); st.sel = (st.sel+5) % 6; syncTune(st.sel + 2); sfx.tick(); hud(); }
+    else if (k==='Enter' || k===' ' || k==='ArrowRight'){ e.preventDefault(); if (onGuide) openSection(st.sel); else tuneTo(2); }
+    return;
+  }
+  if (st.mode === 'section'){
+    const proj = CV.sections[st.cur].projects;
+    if (proj && st.pview === 'list'){
+      if (k==='ArrowDown'){ e.preventDefault(); st.psel = (st.psel+1) % CV.projects.length; sfx.tick(); }
+      else if (k==='ArrowUp'){ e.preventDefault(); st.psel = (st.psel+CV.projects.length-1) % CV.projects.length; sfx.tick(); }
+      else if (k==='Enter' || k===' ' || k==='ArrowRight'){ e.preventDefault(); playProject(st.psel); }
+      else if (/^[1-6]$/.test(k)) playProject(+k-1);
+      else if (k==='Escape' || k==='Backspace' || k==='ArrowLeft'){ e.preventDefault(); goMenu(); }
+      return;
+    }
+    if (k==='Escape' || k==='Backspace' || k==='ArrowLeft'){ e.preventDefault(); proj ? ejectToList() : goMenu(); }
+    else if (k==='ArrowDown'){ e.preventDefault(); scrollBy(70); }
+    else if (k==='ArrowUp'){ e.preventDefault(); scrollBy(-70); }
+    else if (k==='PageDown' || k===' '){ e.preventDefault(); scrollBy(360); }
+    else if (k==='PageUp'){ e.preventDefault(); scrollBy(-360); }
+  }
+});
+
+/* ---------- pointeur : on lance un rayon dans toute la scène ---------- */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), mouse = {x:0, y:0, sx:0, sy:0};
+bulb.userData.lamp = true; shade.userData.lamp = true;
+function pick(cx, cy){
+  ndc.set(cx/innerWidth*2-1, -(cy/innerHeight)*2+1);
+  ray.setFromCamera(ndc, camera);
+  for (const hit of ray.intersectObject(scene, true)){
+    const ud = hit.object.userData;
+    if (ud.skip || hit.object.isPoints || hit.object.isLight) continue;
+    if (ud.tv){
+      const tv = ud.tv; const [u,v] = barrel(hit.uv.x, hit.uv.y);
+      const px = (u*CW - CW/2)/SAFE + CW/2, py = ((1-v)*CH - CH/2)/SAFE + CH/2;
+      return {kind:'screen', tv, h: tv.hits.find(r => px>=r.x && px<=r.x+r.w && py>=r.y && py<=r.y+r.h)};
+    }
+    if (ud.dialOf) return {kind:'dial', tv:ud.dialOf, point:hit.point};
+    if (ud.tape != null) return {kind:'tape', i:ud.tape};
+    if (ud.lamp) return {kind:'lamp'};
+    return null; // un objet opaque bloque le rayon
+  }
+  return null;
+}
+function activeTV(){ return st.mode === 'menu' ? tvs[0] : st.mode === 'section' ? tvs[st.cur+1] : null; }
+const ready = () => (st.mode === 'menu' || st.mode === 'section') && !st.busy;
+let drag = null, hoverTape = -1;
+
+function dialScreenAngle(e){
+  const p = tvs[0].dial.getWorldPosition(new THREE.Vector3()).project(camera);
+  const sx = (p.x*.5+.5)*innerWidth, sy = (-p.y*.5+.5)*innerHeight;
+  return Math.atan2(e.clientY - sy, e.clientX - sx);
+}
+glCanvas.addEventListener('pointermove', e => {
+  mouse.x = e.clientX/innerWidth*2-1; mouse.y = -(e.clientY/innerHeight)*2+1;
+  if (drag && drag.dial){
+    let a = dialScreenAngle(e), d = a - drag.a; if (d > Math.PI) d -= Math.PI*2; if (d < -Math.PI) d += Math.PI*2;
+    drag.acc += d; drag.a = a;
+    while (drag.acc > Math.PI/6){ drag.acc -= Math.PI/6; drag.moved = true; stepTune(1); }
+    while (drag.acc < -Math.PI/6){ drag.acc += Math.PI/6; drag.moved = true; stepTune(-1); }
+    return;
+  }
+  if (drag){ const dy = e.clientY - drag.y; if (Math.abs(e.clientY - drag.y0) > 6) drag.moved = true; drag.y = e.clientY; if (st.mode === 'section' && drag.moved) scrollBy(-dy*1.6); return; }
+  if (!ready()){ glCanvas.style.cursor = 'default'; return; }
+  const p = pick(e.clientX, e.clientY), act = activeTV();
+  let pointer = false, hov = null, ht = -1;
+  if (p){
+    if (p.kind === 'screen'){
+      if (p.tv === act && p.h){ pointer = true; hov = p.h.act;
+        if (p.h.act === 'open' && st.sel !== p.h.i && st.tune >= 2 && st.tune <= 7){ st.sel = p.h.i; syncTune(st.sel + 2); sfx.tick(); hud(); }
+        if (p.h.act === 'proj' && st.psel !== p.h.i){ st.psel = p.h.i; sfx.tick(); }
+        if (p.h.act === 'term') pointer = false;
+      } else if (p.tv !== act) pointer = true;
+    } else if (p.kind === 'dial') pointer = p.tv.idx === 0 && st.mode === 'menu';
+    else if (p.kind === 'tape'){ pointer = true; ht = p.i; }
+    else if (p.kind === 'lamp') pointer = true;
+  }
+  if (act){ const nh = (p && p.tv === act) ? hov : null; if (nh !== act.hover){ if (nh === 'back' || nh === 'list') sfx.tick(); act.hover = nh; } }
+  if (ht !== hoverTape){ if (ht >= 0) sfx.tick(); hoverTape = ht; }
+  glCanvas.style.cursor = pointer ? 'pointer' : 'default';
+});
+glCanvas.addEventListener('pointerdown', e => {
+  glCanvas.setPointerCapture?.(e.pointerId);
+  const p = ready() ? pick(e.clientX, e.clientY) : null;
+  if (p && p.kind === 'dial' && p.tv.idx === 0 && st.mode === 'menu'){ drag = {dial:true, a:dialScreenAngle(e), acc:0, moved:false}; return; }
+  drag = {y:e.clientY, y0:e.clientY, moved:false};
+});
+glCanvas.addEventListener('pointerup', e => {
+  const d = drag; drag = null;
+  if (d && d.dial){ if (!d.moved) stepTune(1); return; }
+  if ((d && d.moved) || !ready()) return;
+  const p = pick(e.clientX, e.clientY); if (!p) return;
+  if (p.kind === 'lamp') return toggleLights();
+  if (p.kind === 'tape') return playProject(p.i);
+  if (p.kind === 'dial') return;
+  const act = activeTV();
+  if (p.tv === act){
+    const h = p.h; if (!h) return;
+    if (h.act === 'open') openSection(h.i);
+    else if (h.act === 'back') goMenu();
+    else if (h.act === 'proj') playProject(h.i);
+    else if (h.act === 'list') ejectToList();
+    else if (h.act === 'term') termInput.focus({preventScroll:true});
+  } else {
+    if (p.tv.idx === 0) goMenu(); else openSection(p.tv.idx - 1);
+  }
+});
+glCanvas.addEventListener('pointercancel', () => { drag = null; });
+glCanvas.addEventListener('wheel', e => {
+  if (st.mode === 'section'){ e.preventDefault(); scrollBy(e.deltaY * (e.deltaMode ? 40 : 1)); return; }
+  if (st.mode === 'menu' && ready()){
+    const p = pick(e.clientX, e.clientY);
+    if (p && p.kind === 'dial'){ e.preventDefault(); const now = performance.now(); if (now - (glCanvas._wt || 0) > 140){ glCanvas._wt = now; stepTune(e.deltaY > 0 ? 1 : -1); } }
+  }
+}, {passive:false});
+backBtn.onclick = () => { if (st.mode === 'section' && CV.sections[st.cur].projects && st.pview === 'detail') ejectToList(); else goMenu(); };
+
+/* =========================================================
+   BOUCLE DE RENDU
+   ========================================================= */
+function drawMain(tv, t){
+  const n = st.tune;
+  if (n === 1) drawMireChannel(tv, t);
+  else if (n >= 2 && n <= 7) drawMenu(tv, t);
+  else if (n === 12){ termBoot(); drawTerminal(tv, t); }
+  else drawNoSignal(tv, t, n);
+}
+onImageReady = () => { for (const tv of tvs) tv.dirty = true; };
+
+function resize(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight, false); composer.setSize(innerWidth, innerHeight); bloom.setSize(innerWidth, innerHeight);
+  if (!tween || tween.t >= 1){
+    const v = st.mode === 'menu' ? viewFor(tvs[0], true) : st.mode === 'section' ? sectionView(st.cur) : null;
+    if (v){ camPos.copy(v.pos); camTgt.copy(v.target); }
+  }
+}
+addEventListener('resize', resize);
+
+setProgress(.8);
+try { await Promise.race([Promise.all([document.fonts.load('58px VT323'), document.fonts.load('600 26px "IBM Plex Mono"')]), new Promise(r=>setTimeout(r, 2500))]); } catch(e){}
+for (const tv of tvs){ if (tv.sec) tv.layout = layoutSection(tv.ctx, tv.sec); }
+refreshTapeLabels();   // une fois les polices chargées
+for (const tv of tvs){ if (tv.idx === 0) drawMain(tv, 0); else drawSection(tv, 0, false); }
+for (const tv of tvs) tv.tex.needsUpdate = true;
+setProgress(.95);
+
+const clock = new THREE.Clock();
+const tmpP = new V(), backDir = new V(), camR = new V(), camU = new V();
+const L = {bulb:8, hemi:.8, spot:4, tv:1};   // niveaux lumineux courants
+function frame(){
+  const dt = Math.min(clock.getDelta(), .05); clockT += dt; const t = clockT;
+  for (let i=timers.length-1;i>=0;i--) if (clockT >= timers[i].at){ const f = timers[i].fn; timers.splice(i,1); f(); }
+
+  // caméra
+  if (tween && tween.t < 1){
+    tween.t = Math.min(1, tween.t + dt/tween.dur); const k = ease(tween.t);
+    camPos.lerpVectors(tween.fp, tween.tp, k); camTgt.lerpVectors(tween.ft, tween.tt, k);
+    backDir.subVectors(tween.fp, tween.ft).add(tmpP.subVectors(tween.tp, tween.tt)).normalize();
+    const arc = Math.sin(Math.PI*k) * tween.lift;
+    tmpP.copy(camPos).addScaledVector(backDir, arc); tmpP.y += arc*.35;
+  } else tmpP.copy(camPos);
+  mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt*3); mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt*3);
+  camera.position.copy(tmpP); camera.lookAt(camTgt);
+  camR.setFromMatrixColumn(camera.matrixWorld, 0); camU.setFromMatrixColumn(camera.matrixWorld, 1);
+  if (!reduce) camera.position.addScaledVector(camR, mouse.sx*.05 + Math.sin(t*.37)*.008).addScaledVector(camU, mouse.sy*.035 + Math.sin(t*.6)*.006);
+  camera.lookAt(camTgt);
+
+  // lumière de la pièce
+  const kL = Math.min(1, dt*4);
+  L.bulb += ((lightsOn ? 8 : 0) - L.bulb)*kL; L.hemi += ((lightsOn ? .8 : .1) - L.hemi)*kL;
+  L.spot += ((lightsOn ? 4 : 0) - L.spot)*kL; L.tv += ((lightsOn ? 1 : 1.5) - L.tv)*kL;
+  bulbLight.intensity = L.bulb * (st.mode === 'boot' ? .55 : .8) * (0.97 + Math.sin(t*31)*.03);
+  bulb.material.emissiveIntensity = 3 * (L.bulb/8) + .05;
+  hemi.intensity = L.hemi;
+  lamp.spot.intensity = L.spot; lamp.bulbM.emissiveIntensity = 2.5 * L.spot/4 + .03;
+  bloom.strength = .62 + (L.tv - 1) * .36;
+
+  // télés
+  const act = activeTV();
+  for (const tv of tvs){
+    if (tv.powerT > tv.power) tv.power = Math.min(tv.powerT, tv.power + dt/(.42*M));
+    tv.stat += (tv.statT - tv.stat) * Math.min(1, dt*5);
+    tv.bright += (tv.brightT - tv.bright) * Math.min(1, dt*5);
+    tv.burst = Math.max(0, tv.burst - dt*3.2); tv.track = Math.max(0, tv.track - dt*.75);
+    const u = tv.mat.uniforms; u.uTime.value = t; u.uStatic.value = Math.min(1, Math.max(tv.stat, tv.burst*.9)); u.uPower.value = tv.power; u.uBright.value = tv.bright; u.uTrack.value = tv.track;
+    tv.light.intensity = L.tv * tv.power * (0.3 + tv.bright*1.25) * (0.92 + Math.sin(t*23 + tv.idx)*.08);
+    if (tv.rack.userData.led) tv.rack.userData.led.material.emissiveIntensity = (Math.sin(t*2 + tv.idx*1.7) > .2 ? 2.2 : .15) * tv.power;
+    tv.led.material.emissiveIntensity = tv.power * (tv === act ? 4 : 1.3);
+    if (tv.dial){
+      const target = -(tv.idx === 0 ? st.dialPos : tv.dialA/(Math.PI/6)) * Math.PI/6;
+      tv.dial.rotation.z += (target - tv.dial.rotation.z) * Math.min(1, dt*12);
+    }
+    if (tv.sec || tv.idx === 0){ const ds = tv.scrollT - tv.scroll; if (Math.abs(ds) > .3){ tv.scroll += ds * Math.min(1, dt*10); tv.dirty = true; } }
+    const isAct = tv === act;
+    if (tv.idx === 0){ if (isAct || tv.dirty){ drawMain(tv, t); tv.tex.needsUpdate = true; tv.dirty = false; } }
+    else if (tv.layout && (isAct || tv.dirty)){ drawSection(tv, t, isAct); tv.tex.needsUpdate = true; tv.dirty = false; }
+  }
+
+  // cassettes, magnétoscope
+  updateTapes(dt);
+  for (const tp of media.tapes){
+    if (tp.anim || tp.inVCR) continue;
+    const want = tp.home.z + (tp.i === hoverTape ? .045 : 0);
+    tp.group.position.z += (want - tp.group.position.z) * Math.min(1, dt*10);
+  }
+  media.vled.material.emissiveIntensity = media.playing >= 0 ? 3 : (st.loading ? (Math.floor(t*6)%2 ? 3 : 0) : 0);
+  drawVCRDisplay(t);
+  if (Math.floor(t*4) !== Math.floor((t-dt)*4)) updateLinks();
+
+  // ambiance
+  bulbGroup.rotation.z = Math.sin(t*.7)*.035; bulbGroup.rotation.x = Math.sin(t*.53)*.025;
+  const pa = dustGeo.attributes.position.array;
+  for (let i=0;i<dustN;i++){ pa[i*3+1] += Math.sin(t*.3 + i)*.0006 - .0004; pa[i*3] += Math.cos(t*.2 + i*1.3)*.0005; if (pa[i*3+1] < 0) pa[i*3+1] = 3.4; }
+  dustGeo.attributes.position.needsUpdate = true;
+
+  composer.render();
+  requestAnimationFrame(frame);
+}
+camera.position.copy(camPos); camera.lookAt(camTgt);
+resize();
+requestAnimationFrame(frame);
+hideLoader();
+
+</script>
